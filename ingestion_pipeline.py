@@ -24,10 +24,10 @@ load_dotenv()
 # Ensure src/ is on the path when run directly
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.ingestion.connectors.vehicle_connector import VehicleConnector
-from src.ingestion.kafka_producer import TelemetryProducer
-from src.ingestion.kafka_consumer import TelemetryConsumer
-from src.ingestion.connectors.schemas import TelemetryBase
+from src.ingestion.connectors.vehicle_connector import VehicleConnector  # noqa: E402
+from src.ingestion.kafka_producer import TelemetryProducer  # noqa: E402
+from src.ingestion.kafka_consumer import TelemetryConsumer  # noqa: E402
+from src.ingestion.connectors.schemas import TelemetryBase  # noqa: E402
 
 logger = structlog.get_logger(__name__)
 

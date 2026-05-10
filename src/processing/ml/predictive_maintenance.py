@@ -7,7 +7,6 @@ Features are derived from CAN-bus and system health telemetry.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import joblib
 import numpy as np
@@ -81,7 +80,6 @@ class MaintenancePredictor:
         return X, y
 
     def _extract_features(self, df: pd.DataFrame) -> np.ndarray:
-        available = [c for c in FEATURE_COLS if c in df.columns]
         result = pd.DataFrame(index=df.index)
         for col in FEATURE_COLS:
             result[col] = df[col] if col in df.columns else 0.0

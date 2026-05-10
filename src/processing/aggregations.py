@@ -37,7 +37,7 @@ def hard_braking_events(df: DataFrame, window_duration: str = "5 minutes") -> Da
     """Count hard-braking events per vehicle per window."""
     return (
         df.withWatermark("timestamp", "2 minutes")
-          .filter(F.col("hard_braking") == True)
+          .filter(F.col("hard_braking"))
           .groupBy(
               F.window("timestamp", window_duration),
               "vehicle_id",

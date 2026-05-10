@@ -50,72 +50,6 @@ resource "aws_emr_cluster" "spark" {
     }
   }
 
-  # Task group with auto-scaling for burst processing
-  task_instance_group {
-    name           = "${local.name}-task"
-    instance_type  = var.task_instance_type
-    instance_count = var.task_min_instances
-
-    ebs_config {
-      size                 = 50
-      type                 = "gp3"
-      volumes_per_instance = 1
-    }
-
-    autoscaling_policy = jsonencode({
-      Constraints = {
-        MinCapacity = var.task_min_instances
-        MaxCapacity = var.task_max_instances
-      }
-      Rules = [
-        {
-          Name        = "ScaleOut"
-          Description = "Scale out if YARN memory available < 15%"
-          Action = {
-            SimpleScalingPolicyConfiguration = {
-              AdjustmentType    = "CHANGE_IN_CAPACITY"
-              ScalingAdjustment = 2
-              CoolDown          = 120
-            }
-          }
-          Trigger = {
-            CloudWatchAlarmDefinition = {
-              ComparisonOperator = "LESS_THAN"
-              EvaluationPeriods  = 1
-              MetricName         = "YARNMemoryAvailablePercentage"
-              Namespace          = "AWS/ElasticMapReduce"
-              Period             = 300
-              Statistic          = "AVERAGE"
-              Threshold          = 15
-            }
-          }
-        },
-        {
-          Name        = "ScaleIn"
-          Description = "Scale in if YARN memory available > 75%"
-          Action = {
-            SimpleScalingPolicyConfiguration = {
-              AdjustmentType    = "CHANGE_IN_CAPACITY"
-              ScalingAdjustment = -1
-              CoolDown          = 300
-            }
-          }
-          Trigger = {
-            CloudWatchAlarmDefinition = {
-              ComparisonOperator = "GREATER_THAN"
-              EvaluationPeriods  = 3
-              MetricName         = "YARNMemoryAvailablePercentage"
-              Namespace          = "AWS/ElasticMapReduce"
-              Period             = 300
-              Statistic          = "AVERAGE"
-              Threshold          = 75
-            }
-          }
-        }
-      ]
-    })
-  }
-
   configurations_json = jsonencode([
     {
       Classification = "spark-defaults"
@@ -165,6 +99,73 @@ resource "aws_emr_cluster" "spark" {
   lifecycle {
     ignore_changes = [core_instance_group[0].instance_count]
   }
+}
+
+# Task instance group — must be a separate resource (not a nested block on aws_emr_cluster)
+resource "aws_emr_instance_group" "task" {
+  cluster_id     = aws_emr_cluster.spark.id
+  name           = "${local.name}-task"
+  instance_type  = var.task_instance_type
+  instance_count = var.task_min_instances
+
+  ebs_config {
+    size                 = 50
+    type                 = "gp3"
+    volumes_per_instance = 1
+  }
+
+  autoscaling_policy = jsonencode({
+    Constraints = {
+      MinCapacity = var.task_min_instances
+      MaxCapacity = var.task_max_instances
+    }
+    Rules = [
+      {
+        Name        = "ScaleOut"
+        Description = "Scale out if YARN memory available < 15%"
+        Action = {
+          SimpleScalingPolicyConfiguration = {
+            AdjustmentType    = "CHANGE_IN_CAPACITY"
+            ScalingAdjustment = 2
+            CoolDown          = 120
+          }
+        }
+        Trigger = {
+          CloudWatchAlarmDefinition = {
+            ComparisonOperator = "LESS_THAN"
+            EvaluationPeriods  = 1
+            MetricName         = "YARNMemoryAvailablePercentage"
+            Namespace          = "AWS/ElasticMapReduce"
+            Period             = 300
+            Statistic          = "AVERAGE"
+            Threshold          = 15
+          }
+        }
+      },
+      {
+        Name        = "ScaleIn"
+        Description = "Scale in if YARN memory available > 75%"
+        Action = {
+          SimpleScalingPolicyConfiguration = {
+            AdjustmentType    = "CHANGE_IN_CAPACITY"
+            ScalingAdjustment = -1
+            CoolDown          = 300
+          }
+        }
+        Trigger = {
+          CloudWatchAlarmDefinition = {
+            ComparisonOperator = "GREATER_THAN"
+            EvaluationPeriods  = 3
+            MetricName         = "YARNMemoryAvailablePercentage"
+            Namespace          = "AWS/ElasticMapReduce"
+            Period             = 300
+            Statistic          = "AVERAGE"
+            Threshold          = 75
+          }
+        }
+      }
+    ]
+  })
 }
 
 output "cluster_id"         { value = aws_emr_cluster.spark.id }

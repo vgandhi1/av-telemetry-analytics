@@ -14,7 +14,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import structlog
 
-from src.ingestion.connectors.schemas import TelemetryBase, SensorType
+from src.ingestion.connectors.schemas import TelemetryBase
 
 logger = structlog.get_logger(__name__)
 

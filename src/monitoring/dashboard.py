@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -20,6 +20,8 @@ from dotenv import load_dotenv
 # Allow running from project root
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 load_dotenv()
+
+from src.monitoring.metrics import get_buffer  # noqa: E402
 
 st.set_page_config(
     page_title="AV Telemetry Analytics",
@@ -297,7 +299,6 @@ with col_throughput:
 st.markdown("---")
 st.subheader("Recent Alerts")
 
-from src.monitoring.metrics import get_buffer
 alerts = get_buffer().recent_alerts(limit=20)
 if alerts:
     alert_df = pd.DataFrame(alerts)

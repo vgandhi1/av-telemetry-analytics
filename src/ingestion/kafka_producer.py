@@ -1,9 +1,7 @@
 """Kafka producer: serializes telemetry events and publishes to topic-per-sensor."""
 from __future__ import annotations
 
-import signal
 import threading
-from typing import Callable
 
 import structlog
 from confluent_kafka import Producer, KafkaException

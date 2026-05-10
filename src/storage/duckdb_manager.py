@@ -5,9 +5,7 @@ and a query interface used by the dashboard and API.
 from __future__ import annotations
 
 import threading
-from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
 
 import duckdb
 import pandas as pd

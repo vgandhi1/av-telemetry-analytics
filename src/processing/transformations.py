@@ -1,7 +1,6 @@
 """PySpark transformations applied to raw telemetry streams."""
 from __future__ import annotations
 
-import math
 
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F

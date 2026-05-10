@@ -99,7 +99,6 @@ def run(config: dict, debug: bool = False) -> None:
         hard_braking_events,
         engine_health_summary,
         imu_vibration_summary,
-        fleet_throughput,
     )
 
     spark_cfg_file = yaml.safe_load(open("config/spark_config.yaml"))

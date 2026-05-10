@@ -18,7 +18,6 @@ from .schemas import (
     GPSEvent,
     IMUEvent,
     LidarEvent,
-    SensorType,
     SystemHealthEvent,
     TelemetryBase,
 )
