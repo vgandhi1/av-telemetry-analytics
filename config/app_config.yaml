@@ -1,0 +1,79 @@
+app:
+  name: av-telemetry-analytics
+  version: "0.1.0"
+  environment: ${ENVIRONMENT:-development}
+  log_level: ${LOG_LEVEL:-INFO}
+
+kafka:
+  bootstrap_servers: ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}
+  topics:
+    gps: av.telemetry.gps
+    imu: av.telemetry.imu
+    lidar: av.telemetry.lidar
+    camera: av.telemetry.camera
+    can_bus: av.telemetry.can_bus
+    system_health: av.telemetry.system
+    alerts: av.alerts
+    processed: av.telemetry.processed
+  consumer_group: av-analytics-consumer
+  auto_offset_reset: earliest
+  enable_auto_commit: false
+  max_poll_records: 500
+  session_timeout_ms: 30000
+  heartbeat_interval_ms: 10000
+  poll_timeout_ms: 1000
+  batch_size: 1000
+
+spark:
+  app_name: AVTelemetryProcessor
+  master: ${SPARK_MASTER:-local[*]}
+  checkpoint_dir: ${SPARK_CHECKPOINT_DIR:-/tmp/spark-checkpoints}
+  trigger_interval: "10 seconds"
+  watermark_delay: "1 minute"
+  output_mode: append
+  shuffle_partitions: 50
+  max_offsets_per_trigger: 10000
+
+storage:
+  s3_bucket: ${S3_BUCKET:-av-telemetry-data}
+  s3_region: ${AWS_DEFAULT_REGION:-us-west-2}
+  s3_prefix: telemetry/v1
+  parquet_partition_cols:
+    - year
+    - month
+    - day
+    - vehicle_id
+    - sensor_type
+  parquet_compression: snappy
+  duckdb_path: ${DUCKDB_PATH:-./data/telemetry.duckdb}
+  local_parquet_dir: ./data/parquet
+  write_batch_size: 5000
+
+monitoring:
+  dashboard_host: "0.0.0.0"
+  dashboard_port: ${DASHBOARD_PORT:-8080}
+  metrics_retention_hours: 48
+  refresh_interval_seconds: 5
+  alert_cooldown_seconds: 300
+  alert_webhook_url: ${ALERT_WEBHOOK_URL:-}
+
+ml:
+  anomaly_detection:
+    model_path: ./models/anomaly_detector.pkl
+    contamination: 0.05
+    n_estimators: 100
+    features:
+      - speed_ms
+      - accel_magnitude
+      - steering_angle_deg
+      - brake_pressure_pct
+      - engine_temp_celsius
+  predictive_maintenance:
+    model_path: ./models/maintenance_predictor.pkl
+    prediction_horizon_hours: 24
+    features:
+      - engine_temp_celsius
+      - oil_pressure_kpa
+      - battery_voltage
+      - odometer_km
+      - brake_wear_pct

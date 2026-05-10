@@ -1,0 +1,51 @@
+s3:
+  bucket: ${S3_BUCKET:-av-telemetry-data}
+  region: ${AWS_DEFAULT_REGION:-us-west-2}
+  prefixes:
+    raw: telemetry/v1/raw
+    processed: telemetry/v1/processed
+    models: models
+    checkpoints: spark-checkpoints
+  upload_concurrency: 10
+  multipart_threshold_mb: 100
+  multipart_chunksize_mb: 100
+
+parquet:
+  compression: snappy
+  row_group_size: 134217728   # 128 MB
+  page_size: 1048576           # 1 MB
+  write_batch_size: 50000
+  partition_cols:
+    - year
+    - month
+    - day
+    - vehicle_id
+    - sensor_type
+  local_staging_dir: ./data/parquet
+  max_local_files_before_flush: 10
+
+duckdb:
+  path: ${DUCKDB_PATH:-./data/telemetry.duckdb}
+  memory_limit: 8GB
+  threads: 8
+  read_only: false
+  tables:
+    gps_events: gps_events
+    imu_events: imu_events
+    can_bus_events: can_bus_events
+    system_health: system_health_events
+    anomalies: anomaly_detections
+    maintenance_predictions: maintenance_predictions
+    vehicle_summary: vehicle_summary_1min
+  s3_extension: true   # enables DuckDB to query S3 parquet directly
+
+dynamodb:
+  region: ${AWS_DEFAULT_REGION:-us-west-2}
+  tables:
+    vehicle_metadata: av-vehicle-metadata
+    data_catalog: av-data-catalog
+    alert_history: av-alert-history
+    pipeline_state: av-pipeline-state
+  read_capacity: 5
+  write_capacity: 5
+  ttl_attribute: expires_at

@@ -1,0 +1,67 @@
+producer:
+  bootstrap.servers: ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}
+  acks: all
+  retries: 3
+  retry.backoff.ms: 500
+  linger.ms: 5
+  batch.size: 65536
+  compression.type: lz4
+  max.in.flight.requests.per.connection: 5
+  enable.idempotence: true
+  request.timeout.ms: 30000
+  delivery.timeout.ms: 120000
+
+consumer:
+  bootstrap.servers: ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}
+  group.id: av-analytics-consumer
+  auto.offset.reset: earliest
+  enable.auto.commit: false
+  max.poll.interval.ms: 300000
+  session.timeout.ms: 30000
+  heartbeat.interval.ms: 10000
+  fetch.min.bytes: 1
+  fetch.max.wait.ms: 500
+  max.partition.fetch.bytes: 1048576
+
+# Topic configurations (for admin client / topic creation)
+topics:
+  av.telemetry.gps:
+    partitions: 12
+    replication_factor: 3
+    retention_ms: 604800000   # 7 days
+    cleanup_policy: delete
+  av.telemetry.imu:
+    partitions: 12
+    replication_factor: 3
+    retention_ms: 604800000
+    cleanup_policy: delete
+  av.telemetry.lidar:
+    partitions: 6
+    replication_factor: 3
+    retention_ms: 259200000   # 3 days (high volume)
+    cleanup_policy: delete
+  av.telemetry.camera:
+    partitions: 6
+    replication_factor: 3
+    retention_ms: 86400000    # 1 day (very high volume — metadata only)
+    cleanup_policy: delete
+  av.telemetry.can_bus:
+    partitions: 12
+    replication_factor: 3
+    retention_ms: 604800000
+    cleanup_policy: delete
+  av.telemetry.system:
+    partitions: 6
+    replication_factor: 3
+    retention_ms: 604800000
+    cleanup_policy: delete
+  av.telemetry.processed:
+    partitions: 12
+    replication_factor: 3
+    retention_ms: 2592000000  # 30 days
+    cleanup_policy: delete
+  av.alerts:
+    partitions: 3
+    replication_factor: 3
+    retention_ms: 2592000000  # 30 days
+    cleanup_policy: delete

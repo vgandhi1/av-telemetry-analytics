@@ -1,0 +1,45 @@
+session:
+  spark.app.name: AVTelemetryProcessor
+  spark.master: ${SPARK_MASTER:-local[*]}
+  spark.sql.shuffle.partitions: "50"
+  spark.default.parallelism: "50"
+  spark.serializer: org.apache.spark.serializer.KryoSerializer
+  spark.sql.streaming.checkpointLocation: ${SPARK_CHECKPOINT_DIR:-/tmp/spark-checkpoints}
+
+  # Kafka integration
+  spark.jars.packages: >-
+    org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,
+    org.apache.hadoop:hadoop-aws:3.3.4,
+    com.amazonaws:aws-java-sdk-bundle:1.12.262
+
+  # S3 / Hadoop
+  spark.hadoop.fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+  spark.hadoop.fs.s3a.aws.credentials.provider: >-
+    com.amazonaws.auth.EnvironmentVariableCredentialsProvider,
+    com.amazonaws.auth.InstanceProfileCredentialsProvider
+  spark.hadoop.fs.s3a.fast.upload: "true"
+  spark.hadoop.fs.s3a.multipart.size: "104857600"  # 100 MB
+
+  # Memory
+  spark.driver.memory: 4g
+  spark.executor.memory: 8g
+  spark.executor.cores: "4"
+  spark.memory.fraction: "0.8"
+  spark.memory.storageFraction: "0.3"
+
+  # Adaptive query execution
+  spark.sql.adaptive.enabled: "true"
+  spark.sql.adaptive.coalescePartitions.enabled: "true"
+
+streaming:
+  trigger_interval: "10 seconds"
+  watermark_delay: "1 minute"
+  output_mode: append
+  max_offsets_per_trigger: 10000
+  processing_time: "10 seconds"
+
+kafka_source:
+  startingOffsets: earliest
+  failOnDataLoss: "false"
+  maxOffsetsPerTrigger: "10000"
+  kafkaConsumer.pollTimeoutMs: "30000"
