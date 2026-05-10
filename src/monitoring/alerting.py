@@ -4,6 +4,7 @@ Alert rule engine and notification dispatcher.
 Rules are evaluated against incoming telemetry snapshots.
 Notifications go to a Slack webhook (configurable) and the in-memory alert buffer.
 """
+
 from __future__ import annotations
 
 import time
@@ -127,7 +128,9 @@ class AlertEngine:
         return fired
 
     def _send_slack(self, message: str, severity: Severity) -> None:
-        emoji = {"low": "ℹ️", "medium": "⚠️", "high": "🚨", "critical": "🔥"}.get(severity.value, "⚠️")
+        emoji = {"low": "ℹ️", "medium": "⚠️", "high": "🚨", "critical": "🔥"}.get(
+            severity.value, "⚠️"
+        )
         payload = {"text": f"{emoji} {message}"}
         try:
             httpx.post(self._webhook_url, json=payload, timeout=5.0)

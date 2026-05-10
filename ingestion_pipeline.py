@@ -5,6 +5,7 @@ Two modes:
   --mode produce   Spin up synthetic vehicle connectors and publish to Kafka.
   --mode consume   Consume from Kafka, validate, and hand off to downstream storage.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -53,6 +54,7 @@ def load_config(path: str = "config/app_config.yaml") -> dict:
 # Producer mode
 # ---------------------------------------------------------------------------
 
+
 def run_producer(config: dict, vehicle_ids: list[str], hz: float = 10.0) -> None:
     bootstrap = config["kafka"]["bootstrap_servers"]
     producer = TelemetryProducer(bootstrap_servers=bootstrap)
@@ -94,6 +96,7 @@ def run_producer(config: dict, vehicle_ids: list[str], hz: float = 10.0) -> None
 # ---------------------------------------------------------------------------
 # Consumer mode
 # ---------------------------------------------------------------------------
+
 
 def _build_event_handler(config: dict):
     """Returns an event handler that validates and dispatches to storage."""
@@ -145,8 +148,10 @@ def run_consumer(config: dict) -> None:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     import logging
+
     structlog.configure(
         wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
         processors=[
@@ -168,8 +173,12 @@ def main() -> None:
         default=["ZX-001", "ZX-002", "ZX-003"],
         help="Vehicle IDs to simulate (producer mode)",
     )
-    parser.add_argument("--hz", type=float, default=10.0, help="Events per second per vehicle")
-    parser.add_argument("--config", default="config/app_config.yaml", help="Config file path")
+    parser.add_argument(
+        "--hz", type=float, default=10.0, help="Events per second per vehicle"
+    )
+    parser.add_argument(
+        "--config", default="config/app_config.yaml", help="Config file path"
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)

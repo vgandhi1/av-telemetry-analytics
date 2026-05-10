@@ -4,6 +4,7 @@ within a configurable time horizon (default 24 hours).
 
 Features are derived from CAN-bus and system health telemetry.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -40,20 +41,27 @@ class MaintenancePredictor:
         learning_rate: float = 0.05,
         max_depth: int = 4,
     ) -> None:
-        self._pipeline = Pipeline([
-            ("scaler", StandardScaler()),
-            ("gbc", GradientBoostingClassifier(
-                n_estimators=n_estimators,
-                learning_rate=learning_rate,
-                max_depth=max_depth,
-                random_state=42,
-            )),
-        ])
+        self._pipeline = Pipeline(
+            [
+                ("scaler", StandardScaler()),
+                (
+                    "gbc",
+                    GradientBoostingClassifier(
+                        n_estimators=n_estimators,
+                        learning_rate=learning_rate,
+                        max_depth=max_depth,
+                        random_state=42,
+                    ),
+                ),
+            ]
+        )
         self._fitted = False
 
     def fit(self, df: pd.DataFrame) -> "MaintenancePredictor":
         X, y = self._prepare(df)
-        logger.info("maintenance_predictor_training", samples=len(X), positive_rate=y.mean())
+        logger.info(
+            "maintenance_predictor_training", samples=len(X), positive_rate=y.mean()
+        )
         scores = cross_val_score(self._pipeline, X, y, cv=5, scoring="roc_auc")
         logger.info("cv_roc_auc", mean=scores.mean(), std=scores.std())
         self._pipeline.fit(X, y)
@@ -89,10 +97,12 @@ class MaintenancePredictor:
         if not self._fitted:
             raise RuntimeError("Model not fitted")
         gbc = self._pipeline.named_steps["gbc"]
-        return pd.DataFrame({
-            "feature": FEATURE_COLS,
-            "importance": gbc.feature_importances_,
-        }).sort_values("importance", ascending=False)
+        return pd.DataFrame(
+            {
+                "feature": FEATURE_COLS,
+                "importance": gbc.feature_importances_,
+            }
+        ).sort_values("importance", ascending=False)
 
     def save(self, path: str) -> None:
         Path(path).parent.mkdir(parents=True, exist_ok=True)

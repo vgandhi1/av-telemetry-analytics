@@ -1,16 +1,28 @@
-variable "project"              { type = string }
-variable "environment"          { type = string }
-variable "vpc_cidr"             { type = string }
-variable "private_subnet_cidrs" { type = list(string) }
-variable "aws_region"           { type = string }
+variable "project" {
+  type = string
+}
+variable "environment" {
+  type = string
+}
+variable "vpc_cidr" {
+  type = string
+}
+variable "private_subnet_cidrs" {
+  type = list(string)
+}
+variable "aws_region" {
+  type = string
+}
 
-data "aws_availability_zones" "available" { state = "available" }
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags = { Name = "${var.project}-${var.environment}-vpc" }
+  tags                 = { Name = "${var.project}-${var.environment}-vpc" }
 }
 
 resource "aws_internet_gateway" "igw" {
@@ -75,6 +87,12 @@ resource "aws_security_group" "emr" {
   tags = { Name = "${var.project}-${var.environment}-emr-sg" }
 }
 
-output "vpc_id"                { value = aws_vpc.main.id }
-output "private_subnet_ids"    { value = aws_subnet.private[*].id }
-output "emr_security_group_id" { value = aws_security_group.emr.id }
+output "vpc_id" {
+  value = aws_vpc.main.id
+}
+output "private_subnet_ids" {
+  value = aws_subnet.private[*].id
+}
+output "emr_security_group_id" {
+  value = aws_security_group.emr.id
+}

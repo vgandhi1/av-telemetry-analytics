@@ -5,6 +5,7 @@ Used in two ways:
   1. Offline training on historical Parquet data.
   2. Online scoring via Spark UDF in the stream processing pipeline.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -32,15 +33,20 @@ class TelemetryAnomalyDetector:
     """Wraps an sklearn IsolationForest + StandardScaler pipeline."""
 
     def __init__(self, contamination: float = 0.05, n_estimators: int = 100) -> None:
-        self._pipeline = Pipeline([
-            ("scaler", StandardScaler()),
-            ("iforest", IsolationForest(
-                n_estimators=n_estimators,
-                contamination=contamination,
-                random_state=42,
-                n_jobs=-1,
-            )),
-        ])
+        self._pipeline = Pipeline(
+            [
+                ("scaler", StandardScaler()),
+                (
+                    "iforest",
+                    IsolationForest(
+                        n_estimators=n_estimators,
+                        contamination=contamination,
+                        random_state=42,
+                        n_jobs=-1,
+                    ),
+                ),
+            ]
+        )
         self._fitted = False
 
     def fit(self, df: pd.DataFrame) -> "TelemetryAnomalyDetector":
@@ -69,7 +75,11 @@ class TelemetryAnomalyDetector:
         missing = [c for c in FEATURE_COLS if c not in df.columns]
         if missing:
             # Derive accel_magnitude if raw components are available
-            if "accel_magnitude" in missing and {"accel_x", "accel_y", "accel_z"}.issubset(df.columns):
+            if "accel_magnitude" in missing and {
+                "accel_x",
+                "accel_y",
+                "accel_z",
+            }.issubset(df.columns):
                 df = df.copy()
                 df["accel_magnitude"] = np.sqrt(
                     df["accel_x"] ** 2 + df["accel_y"] ** 2 + df["accel_z"] ** 2
@@ -110,7 +120,9 @@ def build_spark_udf(model_path: str):
     return score_udf, FEATURE_COLS
 
 
-def train_from_parquet(parquet_dir: str, output_model_path: str, sample_frac: float = 0.1) -> None:
+def train_from_parquet(
+    parquet_dir: str, output_model_path: str, sample_frac: float = 0.1
+) -> None:
     """Convenience function to train the anomaly detector from stored Parquet data."""
     import pyarrow.dataset as ds
 

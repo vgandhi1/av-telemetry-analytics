@@ -2,6 +2,7 @@
 Batched Parquet writer: buffers telemetry events, flushes to local staging,
 then uploads to S3 and optionally syncs to DuckDB.
 """
+
 from __future__ import annotations
 
 import threading
@@ -56,6 +57,7 @@ class ParquetWriter:
         self._s3: Any = None
         if s3_bucket:
             from src.storage.s3_client import S3Client
+
             self._s3 = S3Client(bucket=s3_bucket)
 
     def _partition_key(self, event: TelemetryBase) -> str:
@@ -85,6 +87,7 @@ class ParquetWriter:
             return
 
         import pandas as pd
+
         df = pd.DataFrame(records)
 
         rel_path = f"{key}/{datetime.now(timezone.utc).strftime('%H%M%S%f')}.parquet"

@@ -1,5 +1,9 @@
-variable "project"     { type = string }
-variable "environment" { type = string }
+variable "project" {
+  type = string
+}
+variable "environment" {
+  type = string
+}
 
 locals {
   data_bucket = "${var.project}-data-${var.environment}"
@@ -17,7 +21,9 @@ resource "aws_s3_bucket" "data" {
 
 resource "aws_s3_bucket_versioning" "data" {
   bucket = aws_s3_bucket.data.id
-  versioning_configuration { status = "Enabled" }
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
@@ -43,14 +49,20 @@ resource "aws_s3_bucket_lifecycle_configuration" "data" {
   rule {
     id     = "raw-expire"
     status = "Enabled"
-    filter { prefix = "telemetry/v1/raw/" }
-    expiration { days = 90 }
+    filter {
+      prefix = "telemetry/v1/raw/"
+    }
+    expiration {
+      days = 90
+    }
   }
 
   rule {
     id     = "processed-ia-transition"
     status = "Enabled"
-    filter { prefix = "telemetry/v1/processed/" }
+    filter {
+      prefix = "telemetry/v1/processed/"
+    }
     transition {
       days          = 30
       storage_class = "STANDARD_IA"
@@ -85,10 +97,18 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     id     = "logs-expire"
     status = "Enabled"
     filter {}
-    expiration { days = 30 }
+    expiration {
+      days = 30
+    }
   }
 }
 
-output "data_bucket_id" { value = aws_s3_bucket.data.id }
-output "logs_bucket_id" { value = aws_s3_bucket.logs.id }
-output "data_bucket_arn" { value = aws_s3_bucket.data.arn }
+output "data_bucket_id" {
+  value = aws_s3_bucket.data.id
+}
+output "logs_bucket_id" {
+  value = aws_s3_bucket.logs.id
+}
+output "data_bucket_arn" {
+  value = aws_s3_bucket.data.arn
+}

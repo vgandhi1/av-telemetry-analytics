@@ -4,6 +4,7 @@ In production this would wrap a real vehicle data bus SDK (e.g., ROS2 bridge,
 proprietary CAN-over-TCP adapter). Here it generates realistic synthetic data
 for local development and integration testing.
 """
+
 from __future__ import annotations
 
 import math
@@ -58,7 +59,9 @@ class VehicleConnector:
         self._lat += delta * math.cos(math.radians(self._heading_deg))
         self._lon += delta * math.sin(math.radians(self._heading_deg))
         self._odometer_km += self._speed_ms * 0.1 / 1000
-        self._engine_temp = max(70.0, min(120.0, self._engine_temp + self._rng.uniform(-0.5, 0.5)))
+        self._engine_temp = max(
+            70.0, min(120.0, self._engine_temp + self._rng.uniform(-0.5, 0.5))
+        )
 
     def gps_event(self) -> GPSEvent:
         return GPSEvent(
@@ -107,6 +110,7 @@ class VehicleConnector:
 
     def lidar_event(self) -> LidarEvent:
         import uuid
+
         obstacles = self._rng.randint(0, 8)
         return LidarEvent(
             **self._base_kwargs(),
@@ -117,11 +121,14 @@ class VehicleConnector:
             field_of_view_deg=360.0,
             scan_duration_ms=round(self._rng.uniform(90, 110), 2),
             obstacles_detected=obstacles,
-            closest_obstacle_m=round(self._rng.uniform(2, 30), 2) if obstacles > 0 else None,
+            closest_obstacle_m=(
+                round(self._rng.uniform(2, 30), 2) if obstacles > 0 else None
+            ),
         )
 
     def camera_event(self, camera_id: str = "front") -> CameraEvent:
         import uuid
+
         frame_id = str(uuid.uuid4())
         return CameraEvent(
             **self._base_kwargs(),

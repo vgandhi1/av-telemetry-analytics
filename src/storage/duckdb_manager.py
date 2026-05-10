@@ -2,6 +2,7 @@
 DuckDB manager: schema creation, bulk loading from Parquet,
 and a query interface used by the dashboard and API.
 """
+
 from __future__ import annotations
 
 import threading
@@ -107,7 +108,9 @@ DDL = {
 
 
 class DuckDBManager:
-    def __init__(self, db_path: str, read_only: bool = False, memory_limit: str = "4GB") -> None:
+    def __init__(
+        self, db_path: str, read_only: bool = False, memory_limit: str = "4GB"
+    ) -> None:
         self._path = db_path
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self._conn = duckdb.connect(db_path, read_only=read_only)
@@ -172,7 +175,8 @@ class DuckDBManager:
     # ------------------------------------------------------------------
 
     def active_vehicles(self, last_minutes: int = 5) -> pd.DataFrame:
-        return self.query(f"""
+        return self.query(
+            f"""
             SELECT vehicle_id, MAX(timestamp) AS last_seen,
                    AVG(speed_ms) AS avg_speed_ms,
                    MAX(speed_ms) AS max_speed_ms
@@ -180,26 +184,33 @@ class DuckDBManager:
             WHERE timestamp >= NOW() - INTERVAL '{last_minutes} minutes'
             GROUP BY vehicle_id
             ORDER BY last_seen DESC
-        """)
+        """
+        )
 
     def recent_anomalies(self, limit: int = 50) -> pd.DataFrame:
-        return self.query(f"""
+        return self.query(
+            f"""
             SELECT vehicle_id, timestamp, sensor_type, anomaly_score, features
             FROM anomaly_detections
             ORDER BY detected_at DESC
             LIMIT {limit}
-        """)
+        """
+        )
 
     def speed_timeseries(self, vehicle_id: str, hours: int = 1) -> pd.DataFrame:
-        return self.query("""
+        return self.query(
+            """
             SELECT timestamp, speed_ms, speed_kmh, heading_deg
             FROM gps_events
             WHERE vehicle_id = ? AND timestamp >= NOW() - INTERVAL ? HOUR
             ORDER BY timestamp
-        """, [vehicle_id, hours])
+        """,
+            [vehicle_id, hours],
+        )
 
     def engine_health(self, hours: int = 6) -> pd.DataFrame:
-        return self.query(f"""
+        return self.query(
+            f"""
             SELECT vehicle_id, timestamp,
                    engine_temp_celsius, oil_pressure_kpa,
                    battery_voltage, brake_wear_pct,
@@ -208,10 +219,12 @@ class DuckDBManager:
             WHERE timestamp >= NOW() - INTERVAL '{hours} hours'
               AND (engine_overheating OR low_battery OR brake_wear_pct > 80)
             ORDER BY timestamp DESC
-        """)
+        """
+        )
 
     def fleet_throughput_last_hour(self) -> pd.DataFrame:
-        return self.query("""
+        return self.query(
+            """
             SELECT date_trunc('minute', timestamp) AS minute,
                    COUNT(*) AS event_count,
                    COUNT(DISTINCT vehicle_id) AS active_vehicles
@@ -219,7 +232,8 @@ class DuckDBManager:
             WHERE timestamp >= NOW() - INTERVAL '1 hour'
             GROUP BY 1
             ORDER BY 1
-        """)
+        """
+        )
 
     def close(self) -> None:
         self._conn.close()

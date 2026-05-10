@@ -4,6 +4,7 @@ Prometheus metrics and in-memory ring-buffer for real-time dashboard.
 Metrics are exposed on /metrics (Prometheus scrape endpoint via prometheus_client).
 The ring-buffer is read directly by the Streamlit dashboard for low-latency plots.
 """
+
 from __future__ import annotations
 
 import threading
@@ -65,6 +66,7 @@ PARQUET_WRITE_DURATION = Histogram(
 # In-memory ring buffer for dashboard
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class TelemetrySnapshot:
     ts: datetime
@@ -106,11 +108,7 @@ class MetricsRingBuffer:
     def active_vehicle_ids(self, last_seconds: int = 300) -> set[str]:
         cutoff = time.time() - last_seconds
         with self._lock:
-            return {
-                s.vehicle_id
-                for s in self._buf
-                if s.ts.timestamp() > cutoff
-            }
+            return {s.vehicle_id for s in self._buf if s.ts.timestamp() > cutoff}
 
 
 # Singleton instance shared across modules

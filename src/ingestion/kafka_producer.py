@@ -1,4 +1,5 @@
 """Kafka producer: serializes telemetry events and publishes to topic-per-sensor."""
+
 from __future__ import annotations
 
 import threading
@@ -22,7 +23,9 @@ SENSOR_TOPIC_MAP: dict[SensorType, str] = {
 
 
 class TelemetryProducer:
-    def __init__(self, bootstrap_servers: str, extra_config: dict | None = None) -> None:
+    def __init__(
+        self, bootstrap_servers: str, extra_config: dict | None = None
+    ) -> None:
         config = {
             "bootstrap.servers": bootstrap_servers,
             "acks": "all",

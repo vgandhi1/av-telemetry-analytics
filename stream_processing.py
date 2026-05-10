@@ -4,6 +4,7 @@ Entry point for Spark Structured Streaming pipeline.
 Reads from Kafka, applies transformations + aggregations, scores ML models,
 and sinks results to S3 Parquet and DuckDB.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -51,48 +52,56 @@ def build_spark_session(spark_cfg: dict):
 
 def read_kafka_stream(spark, bootstrap_servers: str, topic: str, streaming_cfg: dict):
     return (
-        spark.readStream
-             .format("kafka")
-             .option("kafka.bootstrap.servers", bootstrap_servers)
-             .option("subscribe", topic)
-             .option("startingOffsets", streaming_cfg.get("startingOffsets", "earliest"))
-             .option("failOnDataLoss", streaming_cfg.get("failOnDataLoss", "false"))
-             .option("maxOffsetsPerTrigger", str(streaming_cfg.get("maxOffsetsPerTrigger", 10_000)))
-             .load()
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", bootstrap_servers)
+        .option("subscribe", topic)
+        .option("startingOffsets", streaming_cfg.get("startingOffsets", "earliest"))
+        .option("failOnDataLoss", streaming_cfg.get("failOnDataLoss", "false"))
+        .option(
+            "maxOffsetsPerTrigger",
+            str(streaming_cfg.get("maxOffsetsPerTrigger", 10_000)),
+        )
+        .load()
     )
 
 
-def write_stream_to_parquet(df, output_path: str, checkpoint_path: str, partition_cols: list[str]):
+def write_stream_to_parquet(
+    df, output_path: str, checkpoint_path: str, partition_cols: list[str]
+):
     return (
-        df.writeStream
-          .format("parquet")
-          .option("path", output_path)
-          .option("checkpointLocation", checkpoint_path)
-          .partitionBy(*partition_cols)
-          .outputMode("append")
-          .trigger(processingTime="10 seconds")
-          .start()
+        df.writeStream.format("parquet")
+        .option("path", output_path)
+        .option("checkpointLocation", checkpoint_path)
+        .partitionBy(*partition_cols)
+        .outputMode("append")
+        .trigger(processingTime="10 seconds")
+        .start()
     )
 
 
 def write_stream_to_console(df, truncate: bool = False):
     return (
-        df.writeStream
-          .format("console")
-          .option("truncate", str(truncate).lower())
-          .outputMode("update")
-          .trigger(processingTime="10 seconds")
-          .start()
+        df.writeStream.format("console")
+        .option("truncate", str(truncate).lower())
+        .outputMode("update")
+        .trigger(processingTime="10 seconds")
+        .start()
     )
 
 
 def run(config: dict, debug: bool = False) -> None:
     from pyspark.sql import functions as F
     from src.processing.transformations import (
-        GPS_SCHEMA, IMU_SCHEMA, CAN_BUS_SCHEMA,
-        parse_kafka_stream, add_time_partitions,
-        enrich_gps, enrich_imu, enrich_can_bus,
-        filter_invalid, deduplicate,
+        GPS_SCHEMA,
+        IMU_SCHEMA,
+        CAN_BUS_SCHEMA,
+        parse_kafka_stream,
+        add_time_partitions,
+        enrich_gps,
+        enrich_imu,
+        enrich_can_bus,
+        filter_invalid,
+        deduplicate,
     )
     from src.processing.aggregations import (
         vehicle_speed_summary,
@@ -124,7 +133,9 @@ def run(config: dict, debug: bool = False) -> None:
     # ------------------------------------------------------------------
     # GPS stream
     # ------------------------------------------------------------------
-    gps_raw = read_kafka_stream(spark, bootstrap, topics["gps"], spark_cfg_file.get("kafka_source", {}))
+    gps_raw = read_kafka_stream(
+        spark, bootstrap, topics["gps"], spark_cfg_file.get("kafka_source", {})
+    )
     gps = (
         parse_kafka_stream(gps_raw, GPS_SCHEMA)
         .transform(lambda df: filter_invalid(df, "gps"))
@@ -135,7 +146,9 @@ def run(config: dict, debug: bool = False) -> None:
 
     queries.append(
         write_stream_to_parquet(
-            gps, s3_path("gps"), checkpoint("gps"),
+            gps,
+            s3_path("gps"),
+            checkpoint("gps"),
             storage_cfg["parquet_partition_cols"],
         )
     )
@@ -156,7 +169,9 @@ def run(config: dict, debug: bool = False) -> None:
     # ------------------------------------------------------------------
     # IMU stream
     # ------------------------------------------------------------------
-    imu_raw = read_kafka_stream(spark, bootstrap, topics["imu"], spark_cfg_file.get("kafka_source", {}))
+    imu_raw = read_kafka_stream(
+        spark, bootstrap, topics["imu"], spark_cfg_file.get("kafka_source", {})
+    )
     imu = (
         parse_kafka_stream(imu_raw, IMU_SCHEMA)
         .transform(lambda df: filter_invalid(df, "imu"))
@@ -167,7 +182,9 @@ def run(config: dict, debug: bool = False) -> None:
 
     queries.append(
         write_stream_to_parquet(
-            imu, s3_path("imu"), checkpoint("imu"),
+            imu,
+            s3_path("imu"),
+            checkpoint("imu"),
             storage_cfg["parquet_partition_cols"],
         )
     )
@@ -185,7 +202,9 @@ def run(config: dict, debug: bool = False) -> None:
     # ------------------------------------------------------------------
     # CAN bus stream (richest source — drives most downstream analytics)
     # ------------------------------------------------------------------
-    can_raw = read_kafka_stream(spark, bootstrap, topics["can_bus"], spark_cfg_file.get("kafka_source", {}))
+    can_raw = read_kafka_stream(
+        spark, bootstrap, topics["can_bus"], spark_cfg_file.get("kafka_source", {})
+    )
     can = (
         parse_kafka_stream(can_raw, CAN_BUS_SCHEMA)
         .transform(lambda df: filter_invalid(df, "can_bus"))
@@ -196,7 +215,9 @@ def run(config: dict, debug: bool = False) -> None:
 
     queries.append(
         write_stream_to_parquet(
-            can, s3_path("can_bus"), checkpoint("can_bus"),
+            can,
+            s3_path("can_bus"),
+            checkpoint("can_bus"),
             storage_cfg["parquet_partition_cols"],
         )
     )
@@ -204,7 +225,10 @@ def run(config: dict, debug: bool = False) -> None:
     # Anomaly scoring via ML UDF (only if model exists)
     anomaly_model_path = config["ml"]["anomaly_detection"]["model_path"]
     if Path(anomaly_model_path).exists():
-        from src.processing.ml.anomaly_detector import build_spark_udf as build_anomaly_udf
+        from src.processing.ml.anomaly_detector import (
+            build_spark_udf as build_anomaly_udf,
+        )
+
         score_udf, feature_cols = build_anomaly_udf(anomaly_model_path)
         can_scored = can.withColumn(
             "anomaly_score",
@@ -254,6 +278,7 @@ def run(config: dict, debug: bool = False) -> None:
 
 def main() -> None:
     import logging
+
     structlog.configure(
         wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
         processors=[
@@ -263,7 +288,9 @@ def main() -> None:
     )
     parser = argparse.ArgumentParser(description="AV Telemetry Stream Processor")
     parser.add_argument("--config", default="config/app_config.yaml")
-    parser.add_argument("--debug", action="store_true", help="Print aggregations to console")
+    parser.add_argument(
+        "--debug", action="store_true", help="Print aggregations to console"
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)

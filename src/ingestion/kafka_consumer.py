@@ -1,4 +1,5 @@
 """Kafka consumer: deserializes and validates telemetry events from all topics."""
+
 from __future__ import annotations
 
 import json

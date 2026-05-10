@@ -1,4 +1,5 @@
 """Thin S3 wrapper: upload, download, list, and presign operations."""
+
 from __future__ import annotations
 
 import os
@@ -32,8 +33,12 @@ class S3Client:
         logger.info("s3_upload", local=local_path, uri=s3_uri)
         return s3_uri
 
-    def upload_bytes(self, data: bytes, s3_key: str, content_type: str = "application/octet-stream") -> str:
-        self._s3.put_object(Bucket=self.bucket, Key=s3_key, Body=data, ContentType=content_type)
+    def upload_bytes(
+        self, data: bytes, s3_key: str, content_type: str = "application/octet-stream"
+    ) -> str:
+        self._s3.put_object(
+            Bucket=self.bucket, Key=s3_key, Body=data, ContentType=content_type
+        )
         return f"s3://{self.bucket}/{s3_key}"
 
     def download_file(self, s3_key: str, local_path: str) -> None:

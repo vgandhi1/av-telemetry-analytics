@@ -1,5 +1,9 @@
-variable "project"     { type = string }
-variable "environment" { type = string }
+variable "project" {
+  type = string
+}
+variable "environment" {
+  type = string
+}
 
 locals {
   prefix = "${var.project}-${var.environment}"
@@ -24,7 +28,9 @@ resource "aws_dynamodb_table" "vehicle_metadata" {
     enabled        = false
   }
 
-  point_in_time_recovery { enabled = true }
+  point_in_time_recovery {
+    enabled = true
+  }
 
   tags = { Name = "${local.prefix}-vehicle-metadata" }
 }
@@ -40,12 +46,12 @@ resource "aws_dynamodb_table" "data_catalog" {
   range_key    = "sort_key"
 
   attribute {
-    name = "partition_key"  # sensor_type#year#month#day
+    name = "partition_key" # sensor_type#year#month#day
     type = "S"
   }
 
   attribute {
-    name = "sort_key"       # vehicle_id#hour
+    name = "sort_key" # vehicle_id#hour
     type = "S"
   }
 
@@ -60,7 +66,9 @@ resource "aws_dynamodb_table" "data_catalog" {
     enabled        = true
   }
 
-  point_in_time_recovery { enabled = true }
+  point_in_time_recovery {
+    enabled = true
+  }
 
   tags = { Name = "${local.prefix}-data-catalog" }
 }
@@ -116,7 +124,15 @@ resource "aws_dynamodb_table" "pipeline_state" {
   tags = { Name = "${local.prefix}-pipeline-state" }
 }
 
-output "vehicle_metadata_table_name" { value = aws_dynamodb_table.vehicle_metadata.name }
-output "data_catalog_table_name"     { value = aws_dynamodb_table.data_catalog.name }
-output "alert_history_table_name"    { value = aws_dynamodb_table.alert_history.name }
-output "pipeline_state_table_name"   { value = aws_dynamodb_table.pipeline_state.name }
+output "vehicle_metadata_table_name" {
+  value = aws_dynamodb_table.vehicle_metadata.name
+}
+output "data_catalog_table_name" {
+  value = aws_dynamodb_table.data_catalog.name
+}
+output "alert_history_table_name" {
+  value = aws_dynamodb_table.alert_history.name
+}
+output "pipeline_state_table_name" {
+  value = aws_dynamodb_table.pipeline_state.name
+}

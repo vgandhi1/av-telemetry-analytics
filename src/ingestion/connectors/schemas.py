@@ -1,4 +1,5 @@
 """Pydantic schemas for all AV telemetry event types."""
+
 from __future__ import annotations
 
 import uuid
@@ -56,7 +57,7 @@ class IMUEvent(TelemetryBase):
     accel_x: float  # m/s²
     accel_y: float
     accel_z: float
-    gyro_x: float   # rad/s
+    gyro_x: float  # rad/s
     gyro_y: float
     gyro_z: float
     roll_deg: float
@@ -95,6 +96,7 @@ class LidarEvent(TelemetryBase):
 
 class CameraEvent(TelemetryBase):
     """Metadata only — raw frames go to S3 directly."""
+
     sensor_type: SensorType = SensorType.CAMERA
     camera_id: str
     frame_id: str

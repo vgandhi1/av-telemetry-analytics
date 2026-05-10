@@ -1,20 +1,54 @@
-variable "project"                  { type = string }
-variable "environment"              { type = string }
-variable "aws_region"               { type = string }
-variable "subnet_id"                { type = string }
-variable "emr_security_group_id"    { type = string }
-variable "release_label"            { type = string }
-variable "master_instance_type"     { type = string }
-variable "core_instance_type"       { type = string }
-variable "core_instance_count"      { type = number }
-variable "task_instance_type"       { type = string }
-variable "task_min_instances"       { type = number }
-variable "task_max_instances"       { type = number }
-variable "key_pair"                 { type = string }
-variable "logs_bucket"              { type = string }
-variable "data_bucket"              { type = string }
-variable "emr_service_role_arn"     { type = string }
-variable "emr_instance_profile_arn" { type = string }
+variable "project" {
+  type = string
+}
+variable "environment" {
+  type = string
+}
+variable "aws_region" {
+  type = string
+}
+variable "subnet_id" {
+  type = string
+}
+variable "emr_security_group_id" {
+  type = string
+}
+variable "release_label" {
+  type = string
+}
+variable "master_instance_type" {
+  type = string
+}
+variable "core_instance_type" {
+  type = string
+}
+variable "core_instance_count" {
+  type = number
+}
+variable "task_instance_type" {
+  type = string
+}
+variable "task_min_instances" {
+  type = number
+}
+variable "task_max_instances" {
+  type = number
+}
+variable "key_pair" {
+  type = string
+}
+variable "logs_bucket" {
+  type = string
+}
+variable "data_bucket" {
+  type = string
+}
+variable "emr_service_role_arn" {
+  type = string
+}
+variable "emr_instance_profile_arn" {
+  type = string
+}
 
 locals {
   name = "${var.project}-${var.environment}-spark"
@@ -54,11 +88,11 @@ resource "aws_emr_cluster" "spark" {
     {
       Classification = "spark-defaults"
       Properties = {
-        "spark.sql.adaptive.enabled"                  = "true"
+        "spark.sql.adaptive.enabled"                    = "true"
         "spark.sql.adaptive.coalescePartitions.enabled" = "true"
-        "spark.hadoop.fs.s3a.fast.upload"             = "true"
-        "spark.hadoop.fs.s3a.multipart.size"          = "104857600"
-        "spark.serializer"                            = "org.apache.spark.serializer.KryoSerializer"
+        "spark.hadoop.fs.s3a.fast.upload"               = "true"
+        "spark.hadoop.fs.s3a.multipart.size"            = "104857600"
+        "spark.serializer"                              = "org.apache.spark.serializer.KryoSerializer"
       }
     },
     {
@@ -168,6 +202,12 @@ resource "aws_emr_instance_group" "task" {
   })
 }
 
-output "cluster_id"         { value = aws_emr_cluster.spark.id }
-output "master_public_dns"  { value = aws_emr_cluster.spark.master_public_dns }
-output "cluster_arn"        { value = aws_emr_cluster.spark.arn }
+output "cluster_id" {
+  value = aws_emr_cluster.spark.id
+}
+output "master_public_dns" {
+  value = aws_emr_cluster.spark.master_public_dns
+}
+output "cluster_arn" {
+  value = aws_emr_cluster.spark.arn
+}
