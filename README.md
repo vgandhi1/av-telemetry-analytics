@@ -1,201 +1,145 @@
-# AV Telemetry Analytics Platform
+<div align="center">
 
-> **Real-time data ingestion, stream processing, and analytics for autonomous vehicle fleets.**
+# 🚗 AV Telemetry Analytics Platform
 
-A production-grade platform for ingesting, processing, storing, and visualizing petabyte-scale telemetry from autonomous vehicle sensors — built with Apache Kafka, Apache Spark Structured Streaming, DuckDB, Apache Parquet, and AWS.
+**Real-time data ingestion, stream processing, and analytics for autonomous vehicle fleets**
 
----
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-3.6-231F20?style=flat-square&logo=apachekafka&logoColor=white)](https://kafka.apache.org)
+[![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.5-E25A1C?style=flat-square&logo=apachespark&logoColor=white)](https://spark.apache.org)
+[![DuckDB](https://img.shields.io/badge/DuckDB-0.10-FFF000?style=flat-square&logo=duckdb&logoColor=black)](https://duckdb.org)
+[![AWS](https://img.shields.io/badge/AWS-EMR%20·%20S3%20·%20DynamoDB-FF9900?style=flat-square&logo=amazonaws&logoColor=white)](https://aws.amazon.com)
+[![Terraform](https://img.shields.io/badge/Terraform-1.7-7B42BC?style=flat-square&logo=terraform&logoColor=white)](https://terraform.io)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.32-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/vgandhi1/av-telemetry-analytics/ci.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white)](https://github.com/vgandhi1/av-telemetry-analytics/actions)
 
-## Table of Contents
+<br/>
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Running the Pipeline](#running-the-pipeline)
-- [Monitoring Dashboard](#monitoring-dashboard)
-- [Machine Learning](#machine-learning)
-- [Infrastructure (Terraform)](#infrastructure-terraform)
-- [Configuration](#configuration)
-- [Testing](#testing)
-- [CI/CD](#cicd)
-- [Contributing](#contributing)
-- [License](#license)
+*Ingest · Process · Detect · Visualize — at petabyte scale*
+
+</div>
 
 ---
 
-## Overview
+## 🗺 Architecture
 
-Autonomous vehicles generate hundreds of megabytes of telemetry per second — GPS, IMU, LiDAR, camera metadata, CAN bus, and system health events — across an entire fleet. This platform provides:
+<div align="center">
+  <img src="docs/architecture.svg" alt="AV Telemetry Analytics — Pipeline Architecture" width="100%"/>
+</div>
 
-- **Sub-second ingestion** of mixed sensor streams via Kafka topic-per-sensor partitioning
-- **Real-time stream processing** with Spark Structured Streaming: transformations, windowed aggregations, and ML inference in a single pipeline
-- **Hybrid storage**: Apache Parquet on S3 for long-term columnar storage, DuckDB for millisecond interactive queries
-- **Anomaly detection** (Isolation Forest) and **predictive maintenance** (Gradient Boosting) scoring inline in the Spark pipeline
-- **Live monitoring dashboard** (Streamlit + Plotly) with vehicle map, speed timeseries, engine health, and anomaly history
-- **Rule-based alerting** with Slack notifications and per-vehicle cooldowns
-- **Prometheus metrics** and CloudWatch integration for pipeline observability
-- **One-command infrastructure** provisioning via Terraform (VPC, EMR, S3, DynamoDB)
+<details>
+<summary><b>How data flows through the platform</b></summary>
+<br/>
 
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         AV Fleet (vehicles)                         │
-│   GPS · IMU · LiDAR · Camera · CAN Bus · System Health             │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           │ 100k+ events/sec
-                           ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Apache Kafka (topic per sensor)                  │
-│  av.telemetry.gps  av.telemetry.imu  av.telemetry.can_bus  ...     │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           │ Structured Streaming
-                           ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│              Apache Spark Structured Streaming (EMR)                │
-│                                                                     │
-│  parse JSON → validate → enrich → deduplicate → aggregate          │
-│       │                                                             │
-│       └──► ML Scoring (Isolation Forest UDF / GBM UDF)            │
-└───────┬──────────────────────────┬──────────────────────────────────┘
-        │                          │
-        ▼                          ▼
-┌───────────────┐        ┌─────────────────────────┐
-│  S3 (Parquet) │        │  Alerts → Slack / SNS   │
-│  Hive-part.   │        └─────────────────────────┘
-│  Snappy comp. │
-└───────┬───────┘
-        │
-        ▼
-┌─────────────────────┐      ┌────────────────────────────────────────┐
-│  DuckDB (local)     │◄─────│  Streamlit Dashboard  :8080            │
-│  httpfs → S3 query  │      │  Vehicle map · Speed · Engine · Alerts │
-└─────────────────────┘      └────────────────────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│         DynamoDB  (metadata · catalog · alert history)              │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
+| Stage | What happens |
 |---|---|
-| Ingestion | Apache Kafka (confluent-kafka), topic-per-sensor |
-| Stream Processing | Apache Spark Structured Streaming 3.5 |
-| ML | scikit-learn (Isolation Forest, Gradient Boosting), Spark pandas UDFs |
-| Long-term Storage | Apache Parquet + S3 (Snappy, Hive partitioning) |
-| Interactive Query | DuckDB 0.10 (httpfs for direct S3 reads) |
-| Metadata / Catalog | AWS DynamoDB |
-| Compute | AWS EMR 7.0 (auto-scaling task groups) |
-| Monitoring | Streamlit + Plotly, Prometheus metrics |
-| Alerting | Rule engine + Slack webhooks |
-| Infrastructure | Terraform 1.7 (VPC, EMR, S3, DynamoDB modules) |
-| CI/CD | GitHub Actions (lint, test, terraform validate, docker build) |
-| Language | Python 3.11 |
+| **AV Fleet** | Six sensor types (GPS, IMU, LiDAR, Camera, CAN Bus, System Health) emit JSON events at up to 100 Hz per vehicle |
+| **Kafka** | Events land in dedicated topics (topic-per-sensor). Producers are idempotent with lz4 compression; consumers batch-commit offsets |
+| **Spark** | Structured Streaming reads all topics, parses schemas, enriches fields, filters invalids, runs windowed aggregations, and scores ML UDFs inline |
+| **ML** | Isolation Forest flags anomalous sensor readings; Gradient Boosting predicts maintenance needs within a 24-hour horizon — both as Spark pandas UDFs |
+| **Storage** | Processed data lands in S3 Parquet (Snappy, Hive-partitioned) for long-term storage and DuckDB for millisecond interactive queries |
+| **DynamoDB** | Vehicle metadata, data catalog, alert history, and pipeline checkpoints |
+| **Alerting** | Rule engine fires Slack webhooks for anomalies, overheating, high speed, and hard braking — with per-vehicle cooldowns |
+| **Dashboard** | Streamlit app at `:8080` reads from DuckDB and the in-memory ring buffer, auto-refreshing every 5–60 s |
+
+</details>
 
 ---
 
-## Project Structure
+## ✨ Features
 
-```
-av-telemetry-analytics/
-│
-├── ingestion_pipeline.py        # Entry point: produce synthetic data OR consume → storage
-├── stream_processing.py         # Entry point: Spark Structured Streaming pipeline
-│
-├── config/
-│   ├── app_config.yaml          # Central config (env-var interpolation)
-│   ├── kafka_config.yaml        # Producer/consumer settings + topic definitions
-│   ├── spark_config.yaml        # SparkSession config + streaming settings
-│   └── storage_config.yaml      # S3, Parquet, DuckDB, DynamoDB settings
-│
-├── src/
-│   ├── ingestion/
-│   │   ├── connectors/
-│   │   │   ├── schemas.py       # Pydantic v2 event schemas (GPS, IMU, CAN bus, …)
-│   │   │   └── vehicle_connector.py  # Synthetic vehicle simulator
-│   │   ├── kafka_producer.py    # Idempotent Kafka producer, topic-per-sensor routing
-│   │   └── kafka_consumer.py    # Batch-committing consumer with schema validation
-│   │
-│   ├── processing/
-│   │   ├── transformations.py   # Spark schemas, enrichment, validity filters
-│   │   ├── aggregations.py      # Windowed aggregations (speed, braking, engine, vibration)
-│   │   └── ml/
-│   │       ├── anomaly_detector.py       # Isolation Forest + Spark UDF
-│   │       └── predictive_maintenance.py # Gradient Boosting + Spark UDF
-│   │
-│   ├── storage/
-│   │   ├── parquet_writer.py    # Thread-safe batching → local staging → S3
-│   │   ├── duckdb_manager.py    # Schema DDL, bulk Parquet load, query helpers
-│   │   └── s3_client.py         # Upload, download, presign, multipart
-│   │
-│   └── monitoring/
-│       ├── dashboard.py         # Streamlit real-time dashboard
-│       ├── alerting.py          # Rule engine + Slack webhook dispatcher
-│       └── metrics.py           # Prometheus metrics + in-memory ring buffer
-│
-├── terraform/
-│   ├── main.tf                  # Root module: wires VPC, S3, DynamoDB, EMR + IAM
-│   ├── variables.tf
-│   ├── outputs.tf
-│   └── modules/
-│       ├── vpc/                 # VPC, private subnets, NAT gateway, EMR security group
-│       ├── s3/                  # Data bucket (versioned, lifecycle), logs bucket
-│       ├── dynamodb/            # 4 tables: vehicle metadata, catalog, alerts, pipeline state
-│       └── emr/                 # Spark cluster with auto-scaling task group
-│
-├── tests/
-│   ├── test_schemas.py          # Schema validation, Kafka serialization, connector tests
-│   ├── test_storage.py          # ParquetWriter, DuckDBManager integration tests
-│   └── test_processing.py       # Anomaly detector fit/predict/save/load
-│
-├── .github/workflows/ci.yml     # Lint → test (with Kafka service) → Terraform validate → Docker
-├── Dockerfile
-├── requirements.txt
-└── setup.py
-```
+<table>
+<tr>
+<td width="50%">
+
+### ⚡ High-Throughput Ingestion
+- **100k+ events/sec** across 6 sensor types
+- Topic-per-sensor Kafka architecture (12 partitions for high-frequency sensors)
+- Idempotent producers with `lz4` compression and `acks=all`
+- Pydantic v2 schema validation at consumer boundary
+- Synthetic vehicle simulator for local dev & testing
+
+</td>
+<td width="50%">
+
+### 🔥 Real-Time Stream Processing
+- Spark Structured Streaming on AWS EMR 7.0
+- Parse → Enrich → Filter → Aggregate → ML Scoring pipeline
+- 5 windowed aggregations: speed, braking, engine health, vibration, fleet throughput
+- Watermark-aware deduplication
+- Adaptive Query Execution enabled
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🤖 Inline ML Inference
+- **Anomaly Detection**: Isolation Forest on 5 CAN-bus features, contamination=0.05
+- **Predictive Maintenance**: Gradient Boosting, 8 features, 24-hour prediction horizon, 5-fold CV
+- Both models exposed as **Spark pandas UDFs** — score directly in the streaming pipeline
+- Train from historical Parquet with one command; model auto-loaded on restart
+
+</td>
+<td width="50%">
+
+### 🗄️ Hybrid Storage Layer
+- **Apache Parquet on S3**: Snappy compression, Hive partitioning `(year/month/day/vehicle_id)`, lifecycle tiers (IA→30d, Glacier→90d)
+- **DuckDB**: Direct S3 reads via `httpfs`, 8GB memory, 6 pre-built dashboard queries
+- **DynamoDB**: 4 tables — vehicle registry, data catalog (GSI), alert history (TTL), pipeline state
+- Thread-safe batching writer with local staging before S3 upload
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📊 Live Monitoring Dashboard
+- Streamlit + Plotly at `http://localhost:8080`
+- **Plotly Mapbox** vehicle location map colored by speed
+- Speed timeseries · Engine temperature (with 105°C threshold) · Anomaly score scatter
+- Hard braking bar chart · Fleet throughput area chart · Live alert feed
+- Configurable 5–60 s auto-refresh and per-vehicle focus filter
+
+</td>
+<td width="50%">
+
+### ☁️ One-Command Infrastructure
+- **Terraform modules**: VPC (private subnets, NAT gateway), S3 (versioned, AES-256), DynamoDB (4 tables), EMR (auto-scaling task group 1–10 nodes)
+- **GitHub Actions CI/CD**: ruff + black + mypy lint, pytest with live Kafka service container, `terraform validate`, Docker build
+- Idle auto-termination for non-prod clusters
+- S3 remote state with DynamoDB lock table
+
+</td>
+</tr>
+</table>
 
 ---
 
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Python 3.11+
-- Java 17 (for Spark — `brew install openjdk@17` on macOS)
-- Docker (optional, for local Kafka)
-- AWS CLI + credentials (for S3/DynamoDB/EMR)
-- Terraform 1.7+ (for infra provisioning)
+```
+Python 3.11+   Java 17 (for Spark)   Docker   AWS CLI   Terraform 1.7+
+```
 
-### 1. Clone and install
+### 1 · Clone & install
 
 ```bash
 git clone https://github.com/vgandhi1/av-telemetry-analytics.git
 cd av-telemetry-analytics
+
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env          # fill in Kafka brokers + AWS credentials
 ```
 
-### 2. Configure environment
+### 2 · Start local Kafka
 
 ```bash
-cp .env.example .env
-# Edit .env with your Kafka brokers, AWS credentials, S3 bucket, etc.
-```
-
-### 3. Start local Kafka (Docker)
-
-```bash
-docker run -d --name kafka \
-  -p 9092:9092 \
+docker run -d --name kafka -p 9092:9092 \
   -e KAFKA_CFG_NODE_ID=1 \
   -e KAFKA_CFG_PROCESS_ROLES=broker,controller \
   -e KAFKA_CFG_CONTROLLER_QUORUM_VOTERS="1@localhost:9093" \
@@ -207,201 +151,193 @@ docker run -d --name kafka \
   bitnami/kafka:3.6
 ```
 
----
-
-## Running the Pipeline
-
-### Produce synthetic vehicle telemetry
+### 3 · Run the pipeline
 
 ```bash
-# Stream 3 simulated vehicles at 10 events/sec each
-python ingestion_pipeline.py --mode produce --vehicles ZX-001 ZX-002 ZX-003 --hz 10
-```
+# Terminal 1 — simulate 3 vehicles at 10 events/sec each
+python ingestion_pipeline.py --mode produce --vehicles ZX-001 ZX-002 ZX-003
 
-### Consume and write to Parquet / DuckDB
-
-```bash
-python ingestion_pipeline.py --mode consume
-```
-
-### Run Spark stream processing
-
-```bash
-# Local mode (uses local[*] Spark master)
-python stream_processing.py
-
-# Debug mode — prints aggregations to console
+# Terminal 2 — Spark stream processing (local mode)
 python stream_processing.py --debug
-```
 
-### Launch the monitoring dashboard
-
-```bash
+# Terminal 3 — monitoring dashboard
 streamlit run src/monitoring/dashboard.py --server.port 8080
-# Open: http://localhost:8080
 ```
 
-### Expose Prometheus metrics
+Open **[http://localhost:8080](http://localhost:8080)**
 
-```python
-from src.monitoring.metrics import start_metrics_server
-start_metrics_server(port=9090)
-# Scrape: http://localhost:9090/metrics
+---
+
+## 📁 Project Structure
+
+```
+av-telemetry-analytics/
+│
+├── 📄 ingestion_pipeline.py       ← produce synthetic telemetry OR consume → storage
+├── 📄 stream_processing.py        ← Spark Structured Streaming entry point
+│
+├── 📂 config/
+│   ├── app_config.yaml            central config with ${ENV_VAR:-default} interpolation
+│   ├── kafka_config.yaml          producer/consumer tuning + topic definitions
+│   ├── spark_config.yaml          SparkSession config + streaming settings
+│   └── storage_config.yaml        S3, Parquet, DuckDB, DynamoDB settings
+│
+├── 📂 src/
+│   ├── ingestion/
+│   │   ├── connectors/
+│   │   │   ├── schemas.py         Pydantic v2 schemas (GPS, IMU, CAN bus, LiDAR, Camera, SysHealth)
+│   │   │   └── vehicle_connector.py  synthetic vehicle simulator (GPS dead-reckoning, CAN state)
+│   │   ├── kafka_producer.py      idempotent producer, topic-per-sensor routing, topic creation
+│   │   └── kafka_consumer.py      batch-committing consumer with schema validation
+│   │
+│   ├── processing/
+│   │   ├── transformations.py     Spark schemas, enrichment UDFs, validity filters
+│   │   ├── aggregations.py        5 windowed aggregations (speed, braking, engine, vibration, throughput)
+│   │   └── ml/
+│   │       ├── anomaly_detector.py        Isolation Forest + Spark pandas UDF
+│   │       └── predictive_maintenance.py  Gradient Boosting + Spark pandas UDF
+│   │
+│   ├── storage/
+│   │   ├── parquet_writer.py      thread-safe batching → local staging → S3
+│   │   ├── duckdb_manager.py      DDL, bulk Parquet load, 6 dashboard query helpers
+│   │   └── s3_client.py           upload, download, presign, multipart
+│   │
+│   └── monitoring/
+│       ├── dashboard.py           Streamlit real-time dashboard (Plotly charts)
+│       ├── alerting.py            rule engine, Slack webhook, per-vehicle cooldowns
+│       └── metrics.py             Prometheus counters/gauges + in-memory ring buffer
+│
+├── 📂 terraform/
+│   ├── main.tf                    root: wires VPC, S3, DynamoDB, EMR + IAM roles
+│   ├── variables.tf / outputs.tf
+│   └── modules/
+│       ├── vpc/                   private subnets (3 AZs), NAT gateway, EMR SG
+│       ├── s3/                    data bucket (versioned, lifecycle), logs bucket
+│       ├── dynamodb/              4 tables with TTL, GSI, PITR
+│       └── emr/                   Spark 3.5, auto-scaling task group, AQE config
+│
+├── 📂 tests/
+│   ├── test_schemas.py            schema validation, Kafka serialization, connector
+│   ├── test_storage.py            ParquetWriter batching, DuckDB DDL + insert/query
+│   └── test_processing.py         anomaly detector fit/predict/save/load
+│
+├── 📄 .github/workflows/ci.yml    lint → test (Kafka service) → terraform validate → docker
+└── 📄 Dockerfile
 ```
 
 ---
 
-## Monitoring Dashboard
+## 🛠 Tech Stack
 
-The Streamlit dashboard at `http://localhost:8080` provides:
-
-| Panel | Description |
-|---|---|
-| KPI tiles | Active vehicles, anomalies, avg fleet speed, overheating count, event throughput |
-| Vehicle map | Real-time Mapbox scatter plot colored by speed |
-| Speed timeseries | Per-vehicle rolling average speed (km/h) |
-| Engine temperature | Per-vehicle temp with 105°C overheat threshold line |
-| Anomaly score history | Scatter plot of ML anomaly scores per vehicle/sensor |
-| Hard braking events | Bar chart ranked by vehicle |
-| Event throughput | Area chart of events/minute ingested |
-| Alert feed | Live table of fired alert rules |
-
-Auto-refreshes every 5–60 seconds (configurable in the sidebar).
+| Layer | Technology | Purpose |
+|---|---|---|
+| Ingestion | **Apache Kafka 3.6** | Distributed, fault-tolerant event streaming |
+| Processing | **Apache Spark 3.5** | Structured Streaming, windowed aggregations |
+| ML | **scikit-learn** (IForest + GBM) | Inline anomaly detection & maintenance prediction |
+| Long-term Storage | **Apache Parquet + S3** | Columnar, compressed, lifecycle-tiered |
+| Interactive Query | **DuckDB 0.10** | Sub-second analytics, direct S3 httpfs reads |
+| Metadata | **AWS DynamoDB** | Fleet registry, catalog, alert history |
+| Compute | **AWS EMR 7.0** | Managed Spark, auto-scaling 1–10 task nodes |
+| Dashboard | **Streamlit + Plotly** | Real-time vehicle map, charts, alert feed |
+| Alerting | Rule engine + Slack | Anomaly / overheat / hard-brake notifications |
+| Observability | **Prometheus** | Pipeline counters, gauges, histograms |
+| IaC | **Terraform 1.7** | VPC, EMR, S3, DynamoDB — all reproducible |
+| CI/CD | **GitHub Actions** | Lint, test, terraform validate, Docker build |
 
 ---
 
-## Machine Learning
+## 🤖 Machine Learning
 
-### Anomaly Detection
-
-Uses **Isolation Forest** (sklearn) to detect out-of-distribution sensor readings inline in the Spark pipeline.
-
-**Features**: `speed_ms`, `accel_magnitude`, `steering_angle_deg`, `brake_pressure_pct`, `engine_temp_celsius`
+### Training the Anomaly Detector
 
 ```bash
-# Train from historical Parquet data
 python -c "
 from src.processing.ml.anomaly_detector import train_from_parquet
-train_from_parquet('./data/parquet/can_bus', './models/anomaly_detector.pkl')
+train_from_parquet('./data/parquet/can_bus', './models/anomaly_detector.pkl', sample_frac=0.2)
 "
 ```
 
-Once `./models/anomaly_detector.pkl` exists, `stream_processing.py` picks it up automatically.
+Once `models/anomaly_detector.pkl` exists, `stream_processing.py` auto-loads it and scores every CAN bus event inline.
 
-### Predictive Maintenance
+**Features**: `speed_ms` · `accel_magnitude` · `steering_angle_deg` · `brake_pressure_pct` · `engine_temp_celsius`
 
-Uses **Gradient Boosting Classifier** to predict maintenance needs within a 24-hour horizon.
-
-**Features**: engine temp, oil pressure, battery voltage, odometer, brake wear, rolling speed/braking aggregates
+### Training the Maintenance Predictor
 
 ```python
 from src.processing.ml.predictive_maintenance import MaintenancePredictor
-predictor = MaintenancePredictor()
-predictor.fit(training_df)   # training_df must include 'needs_maintenance_24h' label
-predictor.save('./models/maintenance_predictor.pkl')
+
+predictor = MaintenancePredictor(n_estimators=200, learning_rate=0.05)
+predictor.fit(training_df)          # needs 'needs_maintenance_24h' label column
 print(predictor.feature_importance())
+predictor.save('./models/maintenance_predictor.pkl')
 ```
 
 ---
 
-## Infrastructure (Terraform)
+## ☁️ Infrastructure
 
 ```bash
 cd terraform
-
-# Initialize (configure backend bucket/key first in main.tf)
 terraform init
-
-# Plan for dev environment
-terraform plan -var="environment=dev"
-
-# Apply
+terraform plan  -var="environment=dev"
 terraform apply -var="environment=dev"
 ```
 
-### Provisioned resources
-
-| Module | Resources |
+| Module | Provisions |
 |---|---|
-| `vpc` | VPC, 3 private subnets across AZs, NAT gateway, EMR security group |
-| `s3` | `av-telemetry-data-{env}` (versioned, AES-256, lifecycle tiers), `av-telemetry-logs-{env}` |
-| `dynamodb` | `vehicle-metadata`, `data-catalog` (GSI), `alert-history` (TTL), `pipeline-state` |
-| `emr` | Spark 3.5 cluster on EMR 7.0, auto-scaling task group (1–10 nodes), AQE enabled |
-
-### Environment variables for Terraform
-
-```bash
-export TF_VAR_environment=prod
-export TF_VAR_emr_core_instance_count=5
-export TF_VAR_alert_email=oncall@yourorg.com
-```
+| `vpc` | VPC · 3 private subnets across AZs · NAT gateway · EMR security group |
+| `s3` | `av-telemetry-data-{env}` — versioned, AES-256, lifecycle tiers |
+| `dynamodb` | 4 tables: vehicle-metadata · data-catalog (GSI) · alert-history (TTL) · pipeline-state |
+| `emr` | Spark 3.5 on EMR 7.0 · auto-scaling task group · AQE · idle auto-termination (non-prod) |
 
 ---
 
-## Configuration
+## 🧪 Testing
 
-All config lives in `config/app_config.yaml` with `${ENV_VAR:-default}` interpolation. Override any value via environment variables — no code changes needed.
+```bash
+pytest tests/ -v --cov=src --cov-report=term-missing
+```
 
-Key settings:
+| Test file | Covers |
+|---|---|
+| `test_schemas.py` | Pydantic validation, vehicle ID format, Kafka key/value serialization, connector event variety |
+| `test_storage.py` | ParquetWriter batching / flush / S3 skip, DuckDB DDL creation, insert + query round-trip |
+| `test_processing.py` | IForest fit/predict, anomalous score ranking, save/load, pre-fit error guard |
 
-| Config path | Description | Default |
+Tests use `tmp_path` fixtures — **no external services required** at test time.
+
+---
+
+## ⚙️ Configuration
+
+All config lives in [`config/app_config.yaml`](config/app_config.yaml) with `${ENV_VAR:-default}` interpolation — override anything via environment variables, no code changes needed.
+
+| Key | Default | Description |
 |---|---|---|
-| `kafka.bootstrap_servers` | Kafka broker list | `localhost:9092` |
-| `kafka.consumer_group` | Consumer group ID | `av-analytics-consumer` |
-| `spark.master` | Spark master URL | `local[*]` |
-| `spark.checkpoint_dir` | Streaming checkpoint path | `/tmp/spark-checkpoints` |
-| `storage.s3_bucket` | S3 data bucket | `av-telemetry-data` |
-| `storage.duckdb_path` | DuckDB database file | `./data/telemetry.duckdb` |
-| `monitoring.dashboard_port` | Streamlit port | `8080` |
-| `ml.anomaly_detection.contamination` | IForest contamination | `0.05` |
+| `kafka.bootstrap_servers` | `localhost:9092` | Kafka broker list |
+| `spark.master` | `local[*]` | Spark master URL |
+| `spark.checkpoint_dir` | `/tmp/spark-checkpoints` | Streaming checkpoint path |
+| `storage.s3_bucket` | `av-telemetry-data` | S3 data bucket |
+| `storage.duckdb_path` | `./data/telemetry.duckdb` | DuckDB file path |
+| `monitoring.dashboard_port` | `8080` | Streamlit port |
+| `ml.anomaly_detection.contamination` | `0.05` | IForest contamination rate |
 
 ---
 
-## Testing
+## 🤝 Contributing
 
-```bash
-# Run all tests
-pytest tests/ -v
-
-# With coverage report
-pytest tests/ --cov=src --cov-report=term-missing
-
-# Individual test modules
-pytest tests/test_schemas.py      # Schema + connector tests
-pytest tests/test_storage.py      # Parquet + DuckDB tests
-pytest tests/test_processing.py   # ML model tests
-```
-
-Tests use `tmp_path` fixtures — no external services required (Kafka/AWS are mocked via `moto`).
+1. Fork → `git checkout -b feature/your-feature`
+2. `pre-commit install` (runs ruff + black on commit)
+3. Add tests for new functionality
+4. `pytest tests/ -v` and `ruff check src/` must pass
+5. Open a PR against `main`
 
 ---
 
-## CI/CD
+<div align="center">
 
-GitHub Actions runs on every push to `main`/`develop` and on all pull requests:
+**Built with Python 3.11 · Apache Kafka · Apache Spark · DuckDB · AWS · Terraform**
 
-| Job | What it does |
-|---|---|
-| `lint` | ruff, black --check, mypy |
-| `test` | pytest with live Kafka service container, coverage upload |
-| `terraform` | `validate` + `fmt -check` across all modules |
-| `docker` | Build image (push disabled by default — add registry config to enable) |
+[⬆ Back to top](#-av-telemetry-analytics-platform)
 
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Install pre-commit hooks: `pre-commit install`
-4. Make your changes and add tests
-5. Run `pytest` and `ruff check` locally
-6. Open a pull request against `main`
-
-Please follow the existing code style — no comments explaining *what* the code does, only *why* when non-obvious.
-
----
-
-## License
-
-[MIT License](LICENSE)
+</div>

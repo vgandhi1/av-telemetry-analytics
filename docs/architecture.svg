@@ -1,0 +1,329 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" width="1200" height="860" font-family="'Segoe UI',Arial,sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#64748B"/>
+    </marker>
+    <marker id="arrW" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+    <filter id="sh" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0000001A"/>
+    </filter>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0F4F8"/>
+      <stop offset="100%" stop-color="#E8EDF3"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E3A5F"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="860" fill="url(#bgGrad)"/>
+
+  <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+  <rect width="1200" height="44" fill="url(#headerGrad)"/>
+  <text x="600" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="white" letter-spacing="0.8">AV Telemetry Analytics — Real-Time Data Pipeline Architecture</text>
+
+  <!-- ═══════════════════════ LAYER 1 · AV FLEET ═══════════════════════ -->
+  <rect x="50" y="55" width="1100" height="118" rx="10" fill="white" stroke="#3B82F6" stroke-width="1.8" filter="url(#sh)"/>
+  <!-- badge -->
+  <rect x="50" y="48" width="210" height="22" rx="5" fill="#2563EB"/>
+  <text x="155" y="63" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">🚗  AV FLEET  (sensors)</text>
+
+  <!-- helper macro: sensor box = colored header stripe + body -->
+  <!-- box w=163, gap=13, start x=70 → 70,246,422,598,774,950 | 950+163=1113 < 1150 ✓ -->
+
+  <!-- GPS -->
+  <rect x="70"  y="66" width="163" height="98" rx="7" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.2"/>
+  <rect x="70"  y="66" width="163" height="26" rx="7" fill="#2563EB"/>
+  <rect x="70"  y="80" width="163" height="12"        fill="#2563EB"/>
+  <text x="151" y="83"  text-anchor="middle" font-size="12" font-weight="700" fill="white">GPS</text>
+  <text x="151" y="108" text-anchor="middle" font-size="9.5" fill="#1E3A8A">lat · lon · altitude</text>
+  <text x="151" y="122" text-anchor="middle" font-size="9.5" fill="#1E3A8A">speed · heading</text>
+  <text x="151" y="138" text-anchor="middle" font-size="9"   fill="#60A5FA">10 Hz</text>
+
+  <!-- IMU -->
+  <rect x="246" y="66" width="163" height="98" rx="7" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.2"/>
+  <rect x="246" y="66" width="163" height="26" rx="7" fill="#2563EB"/>
+  <rect x="246" y="80" width="163" height="12"        fill="#2563EB"/>
+  <text x="327" y="83"  text-anchor="middle" font-size="12" font-weight="700" fill="white">IMU</text>
+  <text x="327" y="108" text-anchor="middle" font-size="9.5" fill="#1E3A8A">accel · gyro</text>
+  <text x="327" y="122" text-anchor="middle" font-size="9.5" fill="#1E3A8A">roll · pitch · yaw</text>
+  <text x="327" y="138" text-anchor="middle" font-size="9"   fill="#60A5FA">100 Hz</text>
+
+  <!-- LiDAR -->
+  <rect x="422" y="66" width="163" height="98" rx="7" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.2"/>
+  <rect x="422" y="66" width="163" height="26" rx="7" fill="#2563EB"/>
+  <rect x="422" y="80" width="163" height="12"        fill="#2563EB"/>
+  <text x="503" y="83"  text-anchor="middle" font-size="12" font-weight="700" fill="white">LiDAR</text>
+  <text x="503" y="108" text-anchor="middle" font-size="9.5" fill="#1E3A8A">point cloud</text>
+  <text x="503" y="122" text-anchor="middle" font-size="9.5" fill="#1E3A8A">range · obstacles</text>
+  <text x="503" y="138" text-anchor="middle" font-size="9"   fill="#60A5FA">10 Hz</text>
+
+  <!-- Camera -->
+  <rect x="598" y="66" width="163" height="98" rx="7" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.2"/>
+  <rect x="598" y="66" width="163" height="26" rx="7" fill="#2563EB"/>
+  <rect x="598" y="80" width="163" height="12"        fill="#2563EB"/>
+  <text x="679" y="83"  text-anchor="middle" font-size="12" font-weight="700" fill="white">Camera</text>
+  <text x="679" y="108" text-anchor="middle" font-size="9.5" fill="#1E3A8A">frame metadata</text>
+  <text x="679" y="122" text-anchor="middle" font-size="9.5" fill="#1E3A8A">objects · lanes</text>
+  <text x="679" y="138" text-anchor="middle" font-size="9"   fill="#60A5FA">30 fps</text>
+
+  <!-- CAN Bus -->
+  <rect x="774" y="66" width="163" height="98" rx="7" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.2"/>
+  <rect x="774" y="66" width="163" height="26" rx="7" fill="#2563EB"/>
+  <rect x="774" y="80" width="163" height="12"        fill="#2563EB"/>
+  <text x="855" y="83"  text-anchor="middle" font-size="12" font-weight="700" fill="white">CAN Bus</text>
+  <text x="855" y="108" text-anchor="middle" font-size="9.5" fill="#1E3A8A">speed · brake</text>
+  <text x="855" y="122" text-anchor="middle" font-size="9.5" fill="#1E3A8A">RPM · throttle</text>
+  <text x="855" y="138" text-anchor="middle" font-size="9"   fill="#60A5FA">100 Hz</text>
+
+  <!-- System Health -->
+  <rect x="950" y="66" width="163" height="98" rx="7" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.2"/>
+  <rect x="950" y="66" width="163" height="26" rx="7" fill="#2563EB"/>
+  <rect x="950" y="80" width="163" height="12"        fill="#2563EB"/>
+  <text x="1031" y="83"  text-anchor="middle" font-size="12" font-weight="700" fill="white">Sys Health</text>
+  <text x="1031" y="108" text-anchor="middle" font-size="9.5" fill="#1E3A8A">CPU · mem · disk</text>
+  <text x="1031" y="122" text-anchor="middle" font-size="9.5" fill="#1E3A8A">network · uptime</text>
+  <text x="1031" y="138" text-anchor="middle" font-size="9"   fill="#60A5FA">1 Hz</text>
+
+  <!-- Arrow 1 + label -->
+  <line x1="600" y1="173" x2="600" y2="207" stroke="#64748B" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="470" y="180" width="260" height="16" rx="3" fill="#E2E8F0"/>
+  <text x="600" y="192" text-anchor="middle" font-size="10.5" fill="#475569">100k+ events/sec · JSON · lz4</text>
+
+  <!-- ═══════════════════════ LAYER 2 · KAFKA ═══════════════════════ -->
+  <rect x="50" y="212" width="1100" height="120" rx="10" fill="white" stroke="#F97316" stroke-width="1.8" filter="url(#sh)"/>
+  <rect x="50" y="205" width="265" height="22" rx="5" fill="#EA580C"/>
+  <text x="182" y="220" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">⚡  APACHE KAFKA  (ingestion)</text>
+  <text x="600" y="238" text-anchor="middle" font-size="10.5" fill="#9A3412">Topic-per-Sensor  ·  Idempotent Producers  ·  3× Replication  ·  lz4  ·  Batch Commit Consumers</text>
+
+  <!-- 6 Kafka topic pills: w=163, gap=13, x=70,246,422,598,774,950 -->
+  <!-- pill -->
+  <rect x="70"  y="248" width="163" height="72" rx="7" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.2"/>
+  <rect x="70"  y="248" width="163" height="22" rx="7" fill="#EA580C"/>
+  <rect x="70"  y="258" width="163" height="12"        fill="#EA580C"/>
+  <text x="151" y="264" text-anchor="middle" font-size="9.5" font-weight="700" fill="white">av.telemetry.gps</text>
+  <text x="151" y="284" text-anchor="middle" font-size="9"   fill="#7C2D12">12 partitions</text>
+  <text x="151" y="298" text-anchor="middle" font-size="9"   fill="#7C2D12">7-day retention</text>
+  <text x="151" y="312" text-anchor="middle" font-size="8.5" fill="#F97316">delete policy</text>
+
+  <rect x="246" y="248" width="163" height="72" rx="7" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.2"/>
+  <rect x="246" y="248" width="163" height="22" rx="7" fill="#EA580C"/>
+  <rect x="246" y="258" width="163" height="12"        fill="#EA580C"/>
+  <text x="327" y="264" text-anchor="middle" font-size="9.5" font-weight="700" fill="white">av.telemetry.imu</text>
+  <text x="327" y="284" text-anchor="middle" font-size="9"   fill="#7C2D12">12 partitions</text>
+  <text x="327" y="298" text-anchor="middle" font-size="9"   fill="#7C2D12">7-day retention</text>
+  <text x="327" y="312" text-anchor="middle" font-size="8.5" fill="#F97316">delete policy</text>
+
+  <rect x="422" y="248" width="163" height="72" rx="7" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.2"/>
+  <rect x="422" y="248" width="163" height="22" rx="7" fill="#EA580C"/>
+  <rect x="422" y="258" width="163" height="12"        fill="#EA580C"/>
+  <text x="503" y="264" text-anchor="middle" font-size="9.5" font-weight="700" fill="white">av.telemetry.lidar</text>
+  <text x="503" y="284" text-anchor="middle" font-size="9"   fill="#7C2D12">6 partitions</text>
+  <text x="503" y="298" text-anchor="middle" font-size="9"   fill="#7C2D12">3-day retention</text>
+  <text x="503" y="312" text-anchor="middle" font-size="8.5" fill="#F97316">delete policy</text>
+
+  <rect x="598" y="248" width="163" height="72" rx="7" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.2"/>
+  <rect x="598" y="248" width="163" height="22" rx="7" fill="#EA580C"/>
+  <rect x="598" y="258" width="163" height="12"        fill="#EA580C"/>
+  <text x="679" y="264" text-anchor="middle" font-size="9.5" font-weight="700" fill="white">av.telemetry.camera</text>
+  <text x="679" y="284" text-anchor="middle" font-size="9"   fill="#7C2D12">6 partitions</text>
+  <text x="679" y="298" text-anchor="middle" font-size="9"   fill="#7C2D12">1-day retention</text>
+  <text x="679" y="312" text-anchor="middle" font-size="8.5" fill="#F97316">delete policy</text>
+
+  <rect x="774" y="248" width="163" height="72" rx="7" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.2"/>
+  <rect x="774" y="248" width="163" height="22" rx="7" fill="#EA580C"/>
+  <rect x="774" y="258" width="163" height="12"        fill="#EA580C"/>
+  <text x="855" y="264" text-anchor="middle" font-size="9.5" font-weight="700" fill="white">av.telemetry.can_bus</text>
+  <text x="855" y="284" text-anchor="middle" font-size="9"   fill="#7C2D12">12 partitions</text>
+  <text x="855" y="298" text-anchor="middle" font-size="9"   fill="#7C2D12">7-day retention</text>
+  <text x="855" y="312" text-anchor="middle" font-size="8.5" fill="#F97316">delete policy</text>
+
+  <rect x="950" y="248" width="163" height="72" rx="7" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.2"/>
+  <rect x="950" y="248" width="163" height="22" rx="7" fill="#EA580C"/>
+  <rect x="950" y="258" width="163" height="12"        fill="#EA580C"/>
+  <text x="1031" y="264" text-anchor="middle" font-size="9.5" font-weight="700" fill="white">av.telemetry.system</text>
+  <text x="1031" y="284" text-anchor="middle" font-size="9"   fill="#7C2D12">6 partitions</text>
+  <text x="1031" y="298" text-anchor="middle" font-size="9"   fill="#7C2D12">7-day retention</text>
+  <text x="1031" y="312" text-anchor="middle" font-size="8.5" fill="#F97316">delete policy</text>
+
+  <!-- Arrow 2 + label -->
+  <line x1="600" y1="332" x2="600" y2="368" stroke="#64748B" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="400" y="339" width="400" height="16" rx="3" fill="#E2E8F0"/>
+  <text x="600" y="351" text-anchor="middle" font-size="10.5" fill="#475569">Spark Structured Streaming · 10s trigger · watermark 1 min</text>
+
+  <!-- ═══════════════════════ LAYER 3 · SPARK ═══════════════════════ -->
+  <rect x="50" y="373" width="1100" height="148" rx="10" fill="white" stroke="#EF4444" stroke-width="1.8" filter="url(#sh)"/>
+  <rect x="50" y="366" width="325" height="22" rx="5" fill="#DC2626"/>
+  <text x="212" y="381" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">🔥  SPARK STRUCTURED STREAMING  (EMR 7.0)</text>
+
+  <!-- 4 pipeline step boxes: w=150, gap=14, x=68 -->
+  <!-- 68, 232(68+150+14), 396, 560 → ML box at 728, w=390, ends 1118 < 1150 ✓ -->
+
+  <!-- Step 1: Parse & Validate -->
+  <rect x="68"  y="392" width="150" height="118" rx="7" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.2"/>
+  <rect x="68"  y="392" width="150" height="24"  rx="7" fill="#DC2626"/>
+  <rect x="68"  y="404" width="150" height="12"        fill="#DC2626"/>
+  <text x="143" y="410" text-anchor="middle" font-size="11"   font-weight="700" fill="white">Parse</text>
+  <text x="143" y="432" text-anchor="middle" font-size="9.5" fill="#991B1B">JSON decode</text>
+  <text x="143" y="447" text-anchor="middle" font-size="9.5" fill="#991B1B">Schema enforce</text>
+  <text x="143" y="462" text-anchor="middle" font-size="9.5" fill="#991B1B">Null checks</text>
+  <text x="143" y="477" text-anchor="middle" font-size="9.5" fill="#991B1B">Deduplication</text>
+  <text x="143" y="498" text-anchor="middle" font-size="8.5" fill="#F87171">Pydantic v2</text>
+  <!-- mini arrow -->
+  <line x1="218" y1="451" x2="232" y2="451" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrW)"/>
+
+  <!-- Step 2: Enrich -->
+  <rect x="232" y="392" width="150" height="118" rx="7" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.2"/>
+  <rect x="232" y="392" width="150" height="24"  rx="7" fill="#DC2626"/>
+  <rect x="232" y="404" width="150" height="12"        fill="#DC2626"/>
+  <text x="307" y="410" text-anchor="middle" font-size="11"   font-weight="700" fill="white">Enrich</text>
+  <text x="307" y="432" text-anchor="middle" font-size="9.5" fill="#991B1B">speed → km/h</text>
+  <text x="307" y="447" text-anchor="middle" font-size="9.5" fill="#991B1B">accel magnitude</text>
+  <text x="307" y="462" text-anchor="middle" font-size="9.5" fill="#991B1B">hard-braking flag</text>
+  <text x="307" y="477" text-anchor="middle" font-size="9.5" fill="#991B1B">overheat / low-bat</text>
+  <text x="307" y="498" text-anchor="middle" font-size="8.5" fill="#F87171">time partitions</text>
+  <line x1="382" y1="451" x2="396" y2="451" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrW)"/>
+
+  <!-- Step 3: Filter -->
+  <rect x="396" y="392" width="150" height="118" rx="7" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.2"/>
+  <rect x="396" y="392" width="150" height="24"  rx="7" fill="#DC2626"/>
+  <rect x="396" y="404" width="150" height="12"        fill="#DC2626"/>
+  <text x="471" y="410" text-anchor="middle" font-size="11"   font-weight="700" fill="white">Filter</text>
+  <text x="471" y="432" text-anchor="middle" font-size="9.5" fill="#991B1B">lat/lon bounds</text>
+  <text x="471" y="447" text-anchor="middle" font-size="9.5" fill="#991B1B">accel &lt; 100 m/s²</text>
+  <text x="471" y="462" text-anchor="middle" font-size="9.5" fill="#991B1B">RPM 0–8000</text>
+  <text x="471" y="477" text-anchor="middle" font-size="9.5" fill="#991B1B">temp −40–200°C</text>
+  <text x="471" y="498" text-anchor="middle" font-size="8.5" fill="#F87171">validity checks</text>
+  <line x1="546" y1="451" x2="560" y2="451" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrW)"/>
+
+  <!-- Step 4: Aggregate -->
+  <rect x="560" y="392" width="150" height="118" rx="7" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.2"/>
+  <rect x="560" y="392" width="150" height="24"  rx="7" fill="#DC2626"/>
+  <rect x="560" y="404" width="150" height="12"        fill="#DC2626"/>
+  <text x="635" y="410" text-anchor="middle" font-size="11"   font-weight="700" fill="white">Aggregate</text>
+  <text x="635" y="432" text-anchor="middle" font-size="9.5" fill="#991B1B">speed 1-min window</text>
+  <text x="635" y="447" text-anchor="middle" font-size="9.5" fill="#991B1B">hard-brake 5-min</text>
+  <text x="635" y="462" text-anchor="middle" font-size="9.5" fill="#991B1B">engine health 5-min</text>
+  <text x="635" y="477" text-anchor="middle" font-size="9.5" fill="#991B1B">IMU vibration 1-min</text>
+  <text x="635" y="498" text-anchor="middle" font-size="8.5" fill="#F87171">watermark aware</text>
+  <line x1="710" y1="451" x2="726" y2="451" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrW)"/>
+
+  <!-- ML Box (purple) -->
+  <rect x="726" y="388" width="392" height="126" rx="8" fill="#FAF5FF" stroke="#A855F7" stroke-width="2"/>
+  <rect x="726" y="388" width="392" height="24"  rx="8" fill="#9333EA"/>
+  <rect x="726" y="400" width="392" height="12"        fill="#9333EA"/>
+  <text x="922" y="405" text-anchor="middle" font-size="11" font-weight="700" fill="white">🤖  ML Inference  (Spark pandas UDFs)</text>
+
+  <!-- Anomaly sub-box -->
+  <rect x="736" y="420" width="182" height="86" rx="6" fill="white" stroke="#D8B4FE" stroke-width="1.5"/>
+  <text x="827" y="438" text-anchor="middle" font-size="10"   font-weight="700" fill="#7E22CE">Anomaly Detection</text>
+  <text x="827" y="454" text-anchor="middle" font-size="9"    fill="#6B21A8">Isolation Forest</text>
+  <text x="827" y="468" text-anchor="middle" font-size="9"    fill="#6B21A8">5 CAN-bus features</text>
+  <text x="827" y="482" text-anchor="middle" font-size="9"    fill="#6B21A8">contamination = 0.05</text>
+  <text x="827" y="498" text-anchor="middle" font-size="8.5"  fill="#A855F7">→ anomaly score + flag</text>
+
+  <!-- Maintenance sub-box -->
+  <rect x="928" y="420" width="182" height="86" rx="6" fill="white" stroke="#D8B4FE" stroke-width="1.5"/>
+  <text x="1019" y="438" text-anchor="middle" font-size="10"   font-weight="700" fill="#7E22CE">Predictive Maintenance</text>
+  <text x="1019" y="454" text-anchor="middle" font-size="9"    fill="#6B21A8">Gradient Boosting</text>
+  <text x="1019" y="468" text-anchor="middle" font-size="9"    fill="#6B21A8">8 features · 24h horizon</text>
+  <text x="1019" y="482" text-anchor="middle" font-size="9"    fill="#6B21A8">5-fold CV on training</text>
+  <text x="1019" y="498" text-anchor="middle" font-size="8.5"  fill="#A855F7">→ maintenance risk %</text>
+
+  <!-- ═══════════════════════ ARROWS SPARK → STORAGE ═══════════════════════ -->
+  <!-- 4 storage boxes centers: S3=181, DuckDB=459, DynamoDB=738, Alerts=1017 -->
+  <!-- Arrow to S3 -->
+  <line x1="143" y1="521" x2="181" y2="558" stroke="#64748B" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <!-- Arrow to DuckDB -->
+  <line x1="460" y1="521" x2="459" y2="558" stroke="#64748B" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <!-- Arrow to DynamoDB -->
+  <line x1="635" y1="521" x2="738" y2="558" stroke="#64748B" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <!-- Arrow to Alerts -->
+  <line x1="922" y1="521" x2="1017" y2="558" stroke="#64748B" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+
+  <!-- ═══════════════════════ LAYER 4 · STORAGE ═══════════════════════ -->
+  <!-- 4 boxes: each w=263, gap=14, start x=50 | 50,327,604,881 | 881+263=1144+6=1150 ✓ -->
+
+  <!-- S3 + Parquet -->
+  <rect x="50"  y="562" width="263" height="118" rx="10" fill="white" stroke="#22C55E" stroke-width="1.8" filter="url(#sh)"/>
+  <rect x="50"  y="555" width="230" height="22"  rx="5"  fill="#16A34A"/>
+  <text x="165" y="570" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">☁️  AWS S3 + Parquet</text>
+  <text x="181" y="592" text-anchor="middle" font-size="9.5" fill="#14532D">Long-term columnar storage</text>
+  <text x="181" y="607" text-anchor="middle" font-size="9"   fill="#166534">Snappy compression</text>
+  <text x="181" y="621" text-anchor="middle" font-size="9"   fill="#166534">Hive partitioning (y/m/d/vid)</text>
+  <text x="181" y="635" text-anchor="middle" font-size="9"   fill="#166534">Lifecycle: IA→30d, Glacier→90d</text>
+  <text x="181" y="649" text-anchor="middle" font-size="9"   fill="#166534">AES-256 · versioned</text>
+  <text x="181" y="667" text-anchor="middle" font-size="8.5" fill="#4ADE80">petabyte-scale</text>
+
+  <!-- DuckDB -->
+  <rect x="327" y="562" width="263" height="118" rx="10" fill="white" stroke="#CA8A04" stroke-width="1.8" filter="url(#sh)"/>
+  <rect x="327" y="555" width="200" height="22"  rx="5"  fill="#B45309"/>
+  <text x="427" y="570" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">🦆  DuckDB</text>
+  <text x="458" y="592" text-anchor="middle" font-size="9.5" fill="#451A03">Fast analytical query engine</text>
+  <text x="458" y="607" text-anchor="middle" font-size="9"   fill="#78350F">httpfs: direct S3 reads</text>
+  <text x="458" y="621" text-anchor="middle" font-size="9"   fill="#78350F">6 pre-built dashboard queries</text>
+  <text x="458" y="635" text-anchor="middle" font-size="9"   fill="#78350F">Bulk Parquet load · 8GB mem</text>
+  <text x="458" y="649" text-anchor="middle" font-size="9"   fill="#78350F">Thread-safe · 4 threads</text>
+  <text x="458" y="667" text-anchor="middle" font-size="8.5" fill="#FBBF24">millisecond queries</text>
+
+  <!-- DynamoDB -->
+  <rect x="604" y="562" width="263" height="118" rx="10" fill="white" stroke="#3B82F6" stroke-width="1.8" filter="url(#sh)"/>
+  <rect x="604" y="555" width="250" height="22"  rx="5"  fill="#1D4ED8"/>
+  <text x="729" y="570" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">🗄️  AWS DynamoDB</text>
+  <text x="735" y="592" text-anchor="middle" font-size="9.5" fill="#1E3A8A">Metadata &amp; catalog store</text>
+  <text x="735" y="607" text-anchor="middle" font-size="9"   fill="#1E40AF">vehicle-metadata (fleet registry)</text>
+  <text x="735" y="621" text-anchor="middle" font-size="9"   fill="#1E40AF">data-catalog (GSI on vehicle)</text>
+  <text x="735" y="635" text-anchor="middle" font-size="9"   fill="#1E40AF">alert-history (TTL enabled)</text>
+  <text x="735" y="649" text-anchor="middle" font-size="9"   fill="#1E40AF">pipeline-state checkpoints</text>
+  <text x="735" y="667" text-anchor="middle" font-size="8.5" fill="#60A5FA">PAY_PER_REQUEST</text>
+
+  <!-- Alerts -->
+  <rect x="881" y="562" width="263" height="118" rx="10" fill="white" stroke="#F43F5E" stroke-width="1.8" filter="url(#sh)"/>
+  <rect x="881" y="555" width="220" height="22"  rx="5"  fill="#BE123C"/>
+  <text x="991" y="570" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">🚨  Alerting + Metrics</text>
+  <text x="1012" y="592" text-anchor="middle" font-size="9.5" fill="#881337">Rule-based alert engine</text>
+  <text x="1012" y="607" text-anchor="middle" font-size="9"   fill="#9F1239">anomaly_detected (60s CD)</text>
+  <text x="1012" y="621" text-anchor="middle" font-size="9"   fill="#9F1239">engine_overheat &gt;105°C</text>
+  <text x="1012" y="635" text-anchor="middle" font-size="9"   fill="#9F1239">high_speed / hard_braking</text>
+  <text x="1012" y="649" text-anchor="middle" font-size="9"   fill="#9F1239">Slack webhook dispatcher</text>
+  <text x="1012" y="667" text-anchor="middle" font-size="8.5" fill="#FB7185">Prometheus :9090</text>
+
+  <!-- Arrow DuckDB → Dashboard -->
+  <line x1="458" y1="680" x2="530" y2="718" stroke="#64748B" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="430" y="691" width="220" height="16" rx="3" fill="#E2E8F0"/>
+  <text x="540" y="703" text-anchor="middle" font-size="10.5" fill="#475569">SQL queries · ring buffer</text>
+
+  <!-- ═══════════════════════ LAYER 5 · DASHBOARD ═══════════════════════ -->
+  <rect x="180" y="722" width="700" height="96" rx="10" fill="white" stroke="#14B8A6" stroke-width="1.8" filter="url(#sh)"/>
+  <rect x="180" y="715" width="340" height="22" rx="5" fill="#0D9488"/>
+  <text x="350" y="730" text-anchor="middle" font-size="11.5" font-weight="700" fill="white">📊  Streamlit Dashboard  :8080</text>
+
+  <!-- 5 feature chips inside dashboard -->
+  <rect x="196" y="744" width="118" height="28" rx="5" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1.2"/>
+  <text x="255" y="763" text-anchor="middle" font-size="9" fill="#134E4A">🗺 Vehicle Map</text>
+
+  <rect x="324" y="744" width="118" height="28" rx="5" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1.2"/>
+  <text x="383" y="763" text-anchor="middle" font-size="9" fill="#134E4A">📈 Speed Charts</text>
+
+  <rect x="452" y="744" width="118" height="28" rx="5" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1.2"/>
+  <text x="511" y="763" text-anchor="middle" font-size="9" fill="#134E4A">🌡 Engine Temp</text>
+
+  <rect x="580" y="744" width="118" height="28" rx="5" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1.2"/>
+  <text x="639" y="763" text-anchor="middle" font-size="9" fill="#134E4A">🤖 Anomaly Feed</text>
+
+  <rect x="708" y="744" width="118" height="28" rx="5" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1.2"/>
+  <text x="767" y="763" text-anchor="middle" font-size="9" fill="#134E4A">🚨 Alert Table</text>
+
+  <text x="530" y="800" text-anchor="middle" font-size="9.5" fill="#0F766E">KPI tiles · Hard Braking · Fleet Throughput · 5–60 s auto-refresh · Vehicle focus filter</text>
+  <text x="530" y="814" text-anchor="middle" font-size="8.5" fill="#2DD4BF">Prometheus metrics at :9090/metrics</text>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <rect x="0" y="832" width="1200" height="28" fill="#1E293B"/>
+  <text x="600" y="850" text-anchor="middle" font-size="10" fill="#94A3B8">
+    Infrastructure: AWS EMR 7.0 (Spark 3.5)  ·  S3  ·  DynamoDB  ·  VPC + NAT Gateway  ·  Auto-scaling Task Group (1–10 nodes)  ·  Terraform 1.7  ·  GitHub Actions CI/CD  ·  Python 3.11
+  </text>
+</svg>
